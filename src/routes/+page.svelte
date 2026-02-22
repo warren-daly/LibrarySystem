@@ -1,2 +1,2 @@
-<h1>Home</h1>
-<p>Visit <a href="https://svelte.dev/docs/kit">svelte.dev/docs/kit</a> to read the documentation</p>
+<h1>Online Library </h1>
+<p>Browse, Rent and Manage your books online.</p>
