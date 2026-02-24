@@ -11,10 +11,10 @@
 <nav>
 
 	<a href="/">Home</a>
-	<a href="/catalogue">Catalogue</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
-    <a href="/login">Login</a>
+	<a href="/Catalogue">Catalogue</a>
+    <a href="/About">About</a>
+    <a href="/Contact">Contact</a>
+    <a href="/Login">Login</a>
 	
 </nav>
 
