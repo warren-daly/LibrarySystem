@@ -15,7 +15,7 @@ To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-npx sv create --template minimal --no-types --add prettier eslint vitest="usages:unit,component" playwright sveltekit-adapter="adapter:auto" drizzle="database:sqlite+sqlite:libsql" --install npm .
+npx sv create --template minimal --no-types --add prettier eslint vitest="usages:unit,component" playwright sveltekit-adapter="adapter:auto" --install npm .
 ```
 
 ## Developing
