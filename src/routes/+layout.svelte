@@ -15,6 +15,7 @@
     <a href="/About">About</a>
     <a href="/Contact">Contact</a>
     <a href="/Login">Login</a>
+	<a href="/Admin">Admin</a>
 	
 </nav>
 
