@@ -1,12 +1,9 @@
-import { sqliteTable, text, integer,real } from 'drizzle-orm/sqlite-core';
-import { sql, relations } from 'drizzle-orm';
-//**TEMP DATABASE */
-export const book = sqliteTable('book', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  title: text('title').notNull(),
-  author: text('author').notNull(),
-  description: text('description'),
-  genre: text('genre'),
-  publishedYear: integer('published_year'),
-  price: real('price'),
+import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+
+export const task = sqliteTable('task', {
+	id: text('id')
+		.primaryKey()
+		.$defaultFn(() => crypto.randomUUID()),
+	title: text('title').notNull(),
+	priority: integer('priority').notNull().default(1)
 });
