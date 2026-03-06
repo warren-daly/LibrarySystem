@@ -39,7 +39,7 @@ function validateForm() {
 
             <label for="pwd">Create a password:</label><br>
             <input type="password" id="pwd" name="pwd" required>
-            <small class="password-hint">Password must be at least 6 characters long.</small><br><br>
+            <small class="password-hint">Passwords must be at least 6 characters long.</small><br><br>
 
             <label for="pwd">Confirm password:</label><br>
             <input type="password" id="pwd" name="pwd" required><br><br>
