@@ -47,7 +47,7 @@
     <a href="/Contact">Contact</a>
 	<div class="auth">
 		<div class="dropdown">
-			<a href="/register">Register</a>
+			<a href="/Register">Register</a>
 		</div>
 		
 		<div class="dropdown">
