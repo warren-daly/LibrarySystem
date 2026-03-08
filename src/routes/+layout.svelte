@@ -4,17 +4,32 @@
 </script>
 
 <style>
+
+.nav {
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
+.auth {
+	margin-left: auto;  
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
+}
+
 .dropdown {
-	position: absolute;
-	right: 1em;
-	display: inline-block;
+	position: relative;
 }
 
 .dropdown-content {
-	background-color: white;
+	background-color: #C5D1EB;
 	display: none;
-	right: 15%;
+	top: 100%;
+	right: 0;
 	position: absolute;
+	padding: 1em;
+	border-radius: 1em 0 1em 1em;
 }
 
 .dropdown:hover .dropdown-content {display: block;}
@@ -24,24 +39,30 @@
 	<link rel="icon" href={favicon} />
 </svelte:head>
 
-<nav>
+<nav class="nav">
 
 	<a href="/">Home</a>
 	<a href="/Catalogue">Catalogue</a>
     <a href="/About">About</a>
     <a href="/Contact">Contact</a>
-	<a href="/register">Register</a>
+	<div class="auth">
+		<div class="dropdown">
+			<a href="/register">Register</a>
+		</div>
+		
+		<div class="dropdown">
+			<button class="dropdown-btn">SignIn</button>
+			<div class="dropdown-content">
+				<form>
+					<label for="username">User Name:</label>
+					<input type="text" id="username" name="username">
+					<label for="password">Password:</label>
+					<input type="password" id="password" name="password">
 
-	<div class="dropdown">
-		<button class="dropdown-btn">Login</button>
-		<div class="dropdown-content">
-			<form>
-				<label for="username">User Name:</label>
-				<input type="text" id="username" name="username">
-				<label for="password">Password:</label>
-				<input type="password" id="password" name="password">
-				<input type="submit" value="Submit">
-			</form>
+					<input type="submit" value="Submit">
+					<a style="right:0;" href="/password reset">Reset Password</a>
+				</form>
+			</div>
 		</div>
 	</div>
 </nav>
