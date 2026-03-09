@@ -1,9 +1,13 @@
-import { integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sql } from 'drizzle-orm';
 
-export const task = sqliteTable('task', {
-	id: text('id')
-		.primaryKey()
-		.$defaultFn(() => crypto.randomUUID()),
-	title: text('title').notNull(),
-	priority: integer('priority').notNull().default(1)
+export const book = sqliteTable('book', {
+  id: integer().primaryKey({ autoIncrement: true }),
+  title: text().notNull(),
+  author: text().notNull(),
+  description: text(),
+  genre: text(),
+  price: integer().notNull(), 
+  image: text(),
+  stock: integer().notNull().default(0),
 });
