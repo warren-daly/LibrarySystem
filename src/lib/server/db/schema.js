@@ -6,10 +6,8 @@ export const book = sqliteTable('book', {
   title: text().notNull(),
   author: text().notNull(),
   description: text(),
-  price: integer().notNull(), // stored in cents
+  genre: text(),
+  price: integer().notNull(), 
   image: text(),
   stock: integer().notNull().default(0),
-  createdAt: integer({ mode: 'timestamp_ms' })
-    .notNull()
-    .default(sql`CURRENT_TIMESTAMP`)
 });
