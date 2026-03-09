@@ -38,8 +38,8 @@ export const actions = {
         description: formData.get('description'),
         genre: formData.get('genre'),
         image: filename,
-        price: Number(formData.get('price')) || 0,
-        stock: Number(formData.get('stock')) || 0
+        price: Number(formData.get('price')),
+        stock: Number(formData.get('stock'))
       };
 
       await bookService.createBook(bookData);
