@@ -1,4 +1,3 @@
-// zodSchemas.ts
 import { z } from 'zod';
 import { createInsertSchema, createSelectSchema } from 'drizzle-zod';
 import { book } from './schema.js';
@@ -24,4 +23,5 @@ export const updateBookSchema = insertBookSchema
 export const deleteBookSchema = z.object({
   id: z.number().int().positive()
 });
+
 

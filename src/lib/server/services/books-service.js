@@ -1,4 +1,3 @@
-// booksService.js
 import { bookDataAccess} from '../data-access/books-data-access.js';
 import { ValidationError, NotFoundError } from '../utils/errors.js';
 import { insertBookSchema, updateBookSchema, deleteBookSchema } from '../db/validation.js';
