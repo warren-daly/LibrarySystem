@@ -1,5 +1,10 @@
 <script>
 	let { data } = $props();
+	
+	const euro = new Intl.NumberFormat('en-IE', {
+		style: 'currency',
+		currency: 'EUR'
+	});
 </script>
 
 <div class="container mt-5">
@@ -20,7 +25,7 @@
 						<h5 class="card-title">{b.title}</h5>
 						<p class="card-text"><strong>Author:</strong> {b.author}</p>
 						<p class="card-text">
-							<strong>Price:</strong> €{(b.price / 100).toFixed(2)}
+							<strong>Price:</strong>{euro.format(b.price / 100)}
 						</p>
 
 						{#if b.stock === 0}
