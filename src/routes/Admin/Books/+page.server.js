@@ -6,8 +6,7 @@ import path from 'path';
 
 
 const uploadsDir = path.resolve('static/uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-
+if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true }); 
 
 export async function load() {
   try {

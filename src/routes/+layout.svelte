@@ -26,7 +26,8 @@
 	<a href="/Catalogue">Catalogue</a>
 	<a href="/About">About</a>
 	<a href="/Contact">Contact</a>
-	<a href="/Admin/Books">Books</a>
+	<a href="/Member">Member</a>
+	<a href="/Admin">Admin</a>
 
 	<div class="dropdown">
 		<button class="dropdown-btn">Login</button>
