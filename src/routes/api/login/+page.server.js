@@ -16,7 +16,7 @@ export const actions = {
         });
 
         if (!found || !(await bcrypt.compare(password, found.password))) {
-            return fail(401, { error: 'Invalid credentials' });
+            redirect(303, '/?error=Invalid+credentials');  // ← redirect home with error
         }
 
         const sessionId = randomUUID();

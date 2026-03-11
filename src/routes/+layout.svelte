@@ -8,12 +8,16 @@
 	import 'bootstrap/dist/css/bootstrap.min.css';
 	import 'bootstrap-icons/font/bootstrap-icons.min.css';
 
+	import { page } from '$app/stores';
+    let error = $derived($page.url.searchParams.get('error'));
+
 	onMount(async () => {
 		if (browser) {
 			console.log('Loading Bootstrap');
 			await import('bootstrap');
 		}
 	});
+	
 	let { data, children } = $props();
     let user = $derived(data.user);
 </script>
@@ -49,6 +53,9 @@
 				<label for="password">Password:</label>
 				<input type="password" id="password" name="password" />
 				<input type="submit" value="Submit" />
+				{#if error}
+    				<p style="color:red">{error}</p>
+				{/if}
 			</form>
 		</div>
 	</div>
