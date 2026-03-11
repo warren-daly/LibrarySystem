@@ -12,6 +12,11 @@ export const user = sqliteTable('users', {
   role: text('role').notNull().default('MEMBER')
 });
 
+export const session = sqliteTable('sessions', {
+    id: text('session_id').primaryKey(),
+    membershipNumber: text('membership_number').notNull()
+});
+
 export const book = sqliteTable('book', {
   id: integer().primaryKey({ autoIncrement: true }),
   title: text().notNull(),
