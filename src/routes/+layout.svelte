@@ -38,6 +38,7 @@ async function handleLogin(e) {
         window.location.href = redirectTo || '/Member';
     }
 }
+
 </script>
 
 <svelte:head>
@@ -51,8 +52,9 @@ async function handleLogin(e) {
 	<a href="/Contact">Contact</a>
 	<a href="/Member">Member</a>
 	{#if user}
-	<a href="/Admin">Admin</a>
-
+		{#if user.role === 'ADMIN'}
+		<a href="/Admin">Admin</a>
+		{/if}
 	<div class="dropdown">
     	<span>Welcome, {user.name}!</span>
 		<div class="logout">

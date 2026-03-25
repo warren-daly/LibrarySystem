@@ -24,15 +24,17 @@ async function originalHandle({ event, resolve }) {
 	return resolve(event);
 }
 
-/** @type {import('@sveltejs/kit').Handle} */ const handleBetterAuth = async ({
-	event,
-	resolve
-}) => {
+/** @type {import('@sveltejs/kit').Handle} */ const handleBetterAuth = async ({ event, resolve }) => {
 	const session = await auth.api.getSession({ headers: event.request.headers });
 
 	if (session) {
 		event.locals.session = session.session;
-		event.locals.user = session.user;
+
+		const dbUser = await db.query.user.findFirst({
+			where: eq(user.email, session.user.email)
+		});
+
+		event.locals.user = dbUser;
 	}
 
 	return svelteKitHandler({ event, resolve, auth, building });
