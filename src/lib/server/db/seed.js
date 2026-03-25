@@ -1,36 +1,44 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
-import { user } from './schema.js';
-import bcrypt from 'bcrypt';
 import { readFileSync } from 'fs';
+import * as schema from './schema.js';
+import * as authSchema from './auth.schema.js';
 
-// Read .env file manually
 const env = Object.fromEntries(
     readFileSync('.env', 'utf-8')
         .split('\n')
         .filter(line => line.includes('='))
         .map(line => {
             const [key, ...rest] = line.split('=');
-            return [key.trim(), rest.join('=').trim()]; // .trim() removes \r
+            return [key.trim(), rest.join('=').trim().replace(/^["']|["']$/g, '')];
         })
 );
 
 const client = createClient({ url: env.DATABASE_URL });
-const db = drizzle(client);
+const db = drizzle(client, { schema: { ...schema, ...authSchema } });
 
 async function seed() {
-    const hashedPassword = await bcrypt.hash('password123', 10);
-
-    await db.insert(user).values({
-        membershipNumber: 'MEM001',
-        firstName: 'John',
-        lastName: 'Doe',
-        email: 'john@example.com',
-        password: hashedPassword,
-        role: 'ADMIN'
+    const response = await fetch(`${env.ORIGIN}/api/auth/sign-up/email`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Origin': env.ORIGIN
+        },
+        body: JSON.stringify({
+            name: 'Admin',
+            email: 'admin@admin.com',
+            password: 'admin123',
+        })
     });
 
-    console.log('User added successfully!');
+    if (!response.ok) {
+        const text = await response.text();
+        console.error('Status:', response.status);
+        console.error('Response:', text);
+        process.exit(1);
+    }
+
+    console.log('Demo user created successfully!');
     process.exit(0);
 }
 

@@ -1,25 +1,43 @@
 <script>
+import favicon from '$lib/assets/favicon.svg';
+import { onMount } from 'svelte';
+import { browser } from '$app/environment';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import 'bootstrap-icons/font/bootstrap-icons.min.css';
+import { page } from '$app/stores';
+import { authClient } from '$lib/auth-client';
 
-	import favicon from '$lib/assets/favicon.svg';
+let error = $derived($page.url.searchParams.get('error'));
 
-	import { onMount } from 'svelte';
+onMount(async () => {
+    if (browser) {
+        console.log('Loading Bootstrap');
+        await import('bootstrap');
+    }
+});
 
-	import { browser } from '$app/environment';
-	import 'bootstrap/dist/css/bootstrap.min.css';
-	import 'bootstrap-icons/font/bootstrap-icons.min.css';
+let { data, children } = $props();
+let user = $derived(data.user);
 
-	import { page } from '$app/stores';
-    let error = $derived($page.url.searchParams.get('error'));
+// Login form state
+let email = $state('');
+let password = $state('');
+let loginError = $state('');
 
-	onMount(async () => {
-		if (browser) {
-			console.log('Loading Bootstrap');
-			await import('bootstrap');
-		}
-	});
-	
-	let { data, children } = $props();
-    let user = $derived(data.user);
+async function handleLogin(e) {
+    e.preventDefault();
+    loginError = '';
+
+    const { error: authError } = await authClient.signIn.email({ email, password });
+
+    if (authError) {
+        loginError = authError.message || 'Invalid email or password';
+    } else {
+        const params = new URLSearchParams(window.location.search);
+        const redirectTo = params.get('redirectTo');
+        window.location.href = redirectTo || '/Member';
+    }
+}
 </script>
 
 <svelte:head>
@@ -32,32 +50,32 @@
 	<a href="/About">About</a>
 	<a href="/Contact">Contact</a>
 	<a href="/Member">Member</a>
+	{#if user}
 	<a href="/Admin">Admin</a>
 
-	{#if user}
 	<div class="dropdown">
-    	<span>Welcome, {user.firstName}!</span>
+    	<span>Welcome, {user.name}!</span>
 		<div class="logout">
-    	<form method="POST" action="/api/logout">
-    	    <button type="submit">Logout</button>
-    	</form>
+    		<button onclick={() => authClient.signOut().then(() => window.location.href = '/')}>
+    			Logout
+			</button>
 		</div>
 	</div>
 	{:else}
 	<div class="dropdown">
-		<button class="dropdown-btn">Login</button>
-		<div class="dropdown-content">
-			<form method="POST" action="/api/login">
-				<label for="email">email:</label>
-				<input type="text" id="email" name="email" />
-				<label for="password">Password:</label>
-				<input type="password" id="password" name="password" />
-				<input type="submit" value="Submit" />
-				{#if error}
-    				<p style="color:red">{error}</p>
+    	<button class="dropdown-btn">Login</button>
+    	<div class="dropdown-content">
+    	    <form onsubmit={handleLogin}>
+    	        <label for="email">Email:</label>
+    	        <input type="text" id="email" name="email" bind:value={email} />
+    	        <label for="password">Password:</label>
+    	        <input type="password" id="password" name="password" bind:value={password} />
+    	        <input type="submit" value="Submit" />
+    	        {#if loginError}
+			    	<p style="color:red">{loginError}</p>
 				{/if}
-			</form>
-		</div>
+    	    </form>
+    	</div>
 	</div>
 	{/if}
 </nav>
