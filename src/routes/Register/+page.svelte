@@ -1,34 +1,39 @@
 <script>
-	import { onMount } from "svelte";
+    import { authClient } from '$lib/auth-client';
 
-	function validateForm(event) {
-		event.preventDefault();
+    let firstName = $state('');
+    let lastName = $state('');
+    let email = $state('');
+    let password = $state('');
+    let confirmPassword = $state('');
+    let errorMessage = $state('');
 
-		let password = document.getElementById("pwd").value;
-		let confirmPassword = document.getElementById("confirmPwd").value;
-		let errorMessage = document.getElementById("errorMessage");
+    async function handleRegister(e) {
+        e.preventDefault();
+        errorMessage = '';
 
-		errorMessage.textContent = "";
+        if (password.length < 6) {
+            errorMessage = 'Password must be at least 6 characters long.';
+            return;
+        }
 
-		if (password.length < 6) {
-			errorMessage.textContent = "Password must be at least 6 characters long.";
-			return;
-		}
+        if (password !== confirmPassword) {
+            errorMessage = 'Passwords do not match.';
+            return;
+        }
 
-		if (password !== confirmPassword) {
-			errorMessage.textContent = "Passwords do not match.";
-			return;
-		}
+        const { error } = await authClient.signUp.email({
+            name: `${firstName} ${lastName}`,
+            email,
+            password
+        });
 
-		errorMessage.textContent = "Registration successful!";
-	}
-
-	onMount(() => {
-		const form = document.querySelector(".form1");
-		if (form) {
-			form.addEventListener("submit", validateForm);
-		}
-	});
+        if (error) {
+            errorMessage = error.message || 'Registration failed.';
+        } else {
+            window.location.href = '/Member';
+        }
+    }
 </script>
 
 <h1 class="heading1">Register As a Member</h1>
@@ -37,23 +42,26 @@
     <h4 class="heading2">Please enter your details below to register.</h4>
 </div>
     <div class="forms-container">
-        <form class="form1">
+        <form class="form1" onsubmit={handleRegister}>
             <label for="fname">First name:</label><br>
-            <input type="text" id="fname" name="fname" required><br><br>
+            <input type="text" id="fname" name="fname" bind:value={firstName} required><br><br>
 
             <label for="lname">Last name:</label><br>
-            <input type="text" id="lname" name="lname" required><br><br>
+            <input type="text" id="lname" name="lname" bind:value={lastName} required><br><br>
 
             <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email" required><br><br>
+            <input type="email" id="email" name="email" bind:value={email} required><br><br>
 
             <label for="pwd">Create a password:</label><br>
-            <input type="password" id="pwd" name="pwd" required minlength="6">
+            <input type="password" id="pwd" name="pwd" bind:value={password} required minlength="6">
             <small class="password-hint">Passwords must be at least 6 characters long.</small><br><br>
 
             <label for="confirmPwd">Confirm password:</label><br>
-            <input type="password" id="confirmPwd" name="confirmPwd" required minlength="6"><br><br>
-            <p id="errorMessage" style="color:red;"></p>
+            <input type="password" id="confirmPwd" name="confirmPwd"  bind:value={confirmPassword} required minlength="6"><br><br>
+            
+			{#if errorMessage}
+            	<p style="color:red;">{errorMessage}</p>
+        	{/if}
 
             <input type="submit" value="Submit" class="submit-btn">
             <input type="reset" value="Reset" class="reset-btn"><br><br><br>
