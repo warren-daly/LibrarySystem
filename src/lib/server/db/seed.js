@@ -1,6 +1,7 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { readFileSync } from 'fs';
+import { eq } from 'drizzle-orm';
 import * as schema from './schema.js';
 import * as authSchema from './auth.schema.js';
 
@@ -37,6 +38,14 @@ async function seed() {
         console.error('Response:', text);
         process.exit(1);
     }
+
+    // Update role directly in the database
+    const client = createClient({ url: env.DATABASE_URL });
+    const db = drizzle(client, { schema: { ...schema } });
+
+    await db.update(authSchema.user)
+        .set({ role: 'ADMIN' })
+        .where(eq(authSchema.user.email, 'admin@admin.com'));
 
     console.log('Demo user created successfully!');
     process.exit(0);
