@@ -1,6 +1,8 @@
 import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import { readFileSync } from 'fs';
+import * as schema from './schema.js';
+import * as authSchema from './auth.schema.js';
 
 const env = Object.fromEntries(
     readFileSync('.env', 'utf-8')
@@ -12,17 +14,20 @@ const env = Object.fromEntries(
         })
 );
 
+const client = createClient({ url: env.DATABASE_URL });
+const db = drizzle(client, { schema: { ...schema, ...authSchema } });
+
 async function seed() {
     const response = await fetch(`${env.ORIGIN}/api/auth/sign-up/email`, {
         method: 'POST',
-        headers: { 
+        headers: {
             'Content-Type': 'application/json',
             'Origin': env.ORIGIN
         },
         body: JSON.stringify({
-            name: 'John Doe',
-            email: 'john@example.com',
-            password: 'password123',
+            name: 'Admin',
+            email: 'admin@admin.com',
+            password: 'admin123',
         })
     });
 
@@ -31,10 +36,10 @@ async function seed() {
         console.error('Status:', response.status);
         console.error('Response:', text);
         process.exit(1);
-}
+    }
 
-console.log('Demo user created successfully!');
-process.exit(0);
+    console.log('Demo user created successfully!');
+    process.exit(0);
 }
 
 seed().catch((e) => {

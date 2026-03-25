@@ -2,17 +2,6 @@ import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
 import { sql, relations } from 'drizzle-orm';
 import { user } from './auth.schema.js';
 
-export const user = sqliteTable('users', {
-	id: integer('user_id').primaryKey({ autoIncrement: true }),
-	membershipNumber: text('membership_number').notNull().unique(),
-	firstName: text('first_name').notNull(),
-	lastName: text('last_name').notNull(),
-	email: text('email').notNull().unique(),
-	password: text('password').notNull(),
-	role: text('role').notNull().default('MEMBER')
-});
-
-
 export const book = sqliteTable('book', {
 	id: integer().primaryKey({ autoIncrement: true }),
 	title: text().notNull(),
@@ -56,4 +45,4 @@ export const rentalDetailRelations = relations(rentalDetail, ({ one }) => ({
 
 export const bookRelations = relations(book, ({ many }) => ({ rentalDetails: many(rentalDetail) }));
 
-export * from './auth.schema';
+export * from './auth.schema.js';
