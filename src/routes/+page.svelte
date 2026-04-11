@@ -20,7 +20,7 @@
         <div class="card-body">
           <h5 class="card-title">Browse Our Catalogue</h5>
           <p class="card-text">Explore our extensive collection of books across various genres.</p>
-          <a href="/Catalogue" class="btn btn-primary">View Catalogue</a>
+          <a href="/catalogue" class="btn btn-primary">View Catalogue</a>
         </div>
       </div>
     </div>
@@ -30,7 +30,7 @@
         <div class="card-body">
           <h5 class="card-title">Manage Your Rentals</h5>
           <p class="card-text">View your rented books and manage your account.</p>
-          <a href="/Member/Rentals" class="btn btn-primary">My Rentals</a>
+          <a href="/member/rentals" class="btn btn-primary">My Rentals</a>
         </div>
       </div>
     </div>
