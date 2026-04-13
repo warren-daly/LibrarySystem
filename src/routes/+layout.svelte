@@ -19,7 +19,7 @@ onMount(async () => {
 let { data, children } = $props();
 let user = $derived(data.user);
 
-// Login form state
+
 let email = $state('');
 let password = $state('');
 let loginError = $state('');
@@ -47,13 +47,13 @@ async function handleLogin(e) {
 
 <nav>
 	<a href="/">Home</a>
-	<a href="/Catalogue">Catalogue</a>
-	<a href="/About">About</a>
-	<a href="/Contact">Contact</a>
-	<a href="/Member">Member</a>
+	<a href="/catalogue">Catalogue</a>
+	<a href="/about">About</a>
+	<a href="/contact">Contact</a>
+	<a href="/member">Member</a>
 	{#if user}
 		{#if user.role === 'ADMIN'}
-		<a href="/Admin">Admin</a>
+		<a href="/admin">Admin</a>
 		{/if}
 	<div class="dropdown">
     	<span>Welcome, {user.name}!</span>
