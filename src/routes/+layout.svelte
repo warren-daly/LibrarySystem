@@ -46,15 +46,20 @@ async function handleLogin(e) {
 </svelte:head>
 
 <nav>
-	<a href="/">Home</a>
-	<a href="/catalogue">Catalogue</a>
-	<a href="/about">About</a>
-	<a href="/contact">Contact</a>
-	<a href="/member">Member</a>
-	{#if user}
-		{#if user.role === 'ADMIN'}
-		<a href="/admin">Admin</a>
-		{/if}
+    <a href="/">Home</a>
+    <a href="/catalogue">Catalogue</a>
+    <a href="/about">About</a>
+    <a href="/contact">Contact</a>
+    <a href="/member">Member</a>
+
+    {#if user}
+        {#if user.role === 'ADMIN'}
+            <a href="/admin">Admin</a>
+    {/if}
+	
+	{#if data.user && data.cartCount > 0}
+        <a href="/cart"><i class="bi bi-cart me-1"></i>Cart</a>
+    {/if}
 	<div class="dropdown">
     	<span>Welcome, {user.name}!</span>
 		<div class="logout">

@@ -1,6 +1,6 @@
 import { eq } from 'drizzle-orm';
 import { db } from '$lib/server/db';
-import { user } from '$lib/server/db/auth.schema.js';
+import { user, account } from '$lib/server/db/auth.schema.js';
 
 const publicCols = {
 	id: user.id,
@@ -31,6 +31,15 @@ export const usersDataAccess = {
 	async update(id, userData) {
 		const result = await db.update(user).set(userData).where(eq(user.id, id)).returning(publicCols);
 		return result[0] ?? null;
+	},
+
+	async updatePassword(userId, hashedPassword) {
+	    const result = await db
+	        .update(account)
+	        .set({ password: hashedPassword })
+	        .where(eq(account.userId, userId))
+	        .returning();
+	    return result[0] ?? null;
 	},
 
 	async delete(id) {
