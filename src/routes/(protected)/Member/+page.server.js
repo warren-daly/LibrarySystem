@@ -1,131 +1,82 @@
-import { db } from '$lib/server/db';
-import { order, orderItem, book } from '$lib/server/db/schema';
-import { eq, sql } from 'drizzle-orm';
-import { error, redirect } from '@sveltejs/kit';
+import { rentalService } from '$lib/server/services/rental-service.js';
+import { bookService } from '$lib/server/services/books-service.js';
+import { error, fail } from '@sveltejs/kit';
+import { ZodError } from 'zod';
 
-export async function load({ locals }) {
-  if (!locals.user) throw error(401, 'Not authenticated');
+export async function load({ url, locals }) {
+	try {
+		const rentals = await rentalService.getAllrentals();
+		const books = await bookService.getAllBooks();
+		const selectedBookId = url.searchParams.get('bookId');
 
-  const userId = locals.user.id;
+		const memberRentals = locals.user
+			? rentals.filter((r) => Number(r.userId) === Number(locals.user.id))
+			: [];
 
-  // Get all orders for this user
-  const orders = await db
-    .select({
-      id: order.id,
-      status: order.status,
-      rentalDate: order.rentalDate,
-      returnDate: order.returnDate,
-      total: order.total,
-      createdAt: order.createdAt
-    })
-    .from(order)
-    .where(eq(order.userId, userId));
-
-  // Get items for each order
-  const orderItemsMap = {};
-  for (const o of orders) {
-    const items = await db
-      .select({
-        id: orderItem.id,
-        bookId: orderItem.bookId,
-        title: book.title,
-        quantity: orderItem.quantity,
-        unitPrice: orderItem.unitPrice,
-        type: orderItem.type
-      })
-      .from(orderItem)
-      .innerJoin(book, eq(orderItem.bookId, book.id))
-      .where(eq(orderItem.orderId, o.id));
-    orderItemsMap[o.id] = items || [];
-  }
-
-  // Separate rentals and purchases
-  const rentals = orders
-    .filter(o => o.status === 'rented')
-    .map(r => ({ ...r, items: orderItemsMap[r.id] || [] }));
-  
-  const purchases = orders
-    .filter(o => o.status === 'completed')
-    .map(p => ({ ...p, items: orderItemsMap[p.id] || [] }));
-
-  return {
-    user: locals.user,
-    rentals,
-    purchases
-  };
+		return {
+			rentals: memberRentals,
+			books,
+			selectedBookId: selectedBookId ? Number(selectedBookId) : null,
+			currentUser: locals.user ?? null
+		};
+	} catch (err) {
+		console.error('Error retrieving rentals:', err);
+		throw error(500, 'Failed to load rentals');
+	}
 }
 
 export const actions = {
-  returnBook: async ({ locals, request }) => {
-    if (!locals.user) throw error(401, 'Not authenticated');
+	createRental: async ({ request, locals }) => {
+		try {
+			if (!locals.user) {
+				return fail(401, {
+					errors: { general: 'You must be logged in to create a rental' }
+				});
+			}
 
-    const formData = await request.formData();
-    const orderId = Number(formData.get('orderId'));
-    const orderItemId = Number(formData.get('orderItemId'));
+			const formData = await request.formData();
+			const rentalDays = Number(formData.get('rentalDays'));
+			const bookId = Number(formData.get('bookId'));
 
-    if (!Number.isInteger(orderId) || orderId < 1) {
-      throw error(400, 'Invalid order ID');
-    }
-    if (!Number.isInteger(orderItemId) || orderItemId < 1) {
-      throw error(400, 'Invalid item ID');
-    }
+			if (!bookId) {
+				return fail(400, {
+					errors: { bookId: 'Book is required' }
+				});
+			}
 
-    // Verify order belongs to user and is rented
-    const orderResult = await db
-      .select()
-      .from(order)
-      .where(eq(order.id, orderId))
-      .limit(1);
+			if (!rentalDays || rentalDays < 1 || rentalDays > 14) {
+				return fail(400, {
+					errors: { rentalDays: 'Please select a rental duration between 1 and 14 days' }
+				});
+			}
 
-    if (!orderResult.length) {
-      throw error(404, 'Order not found');
-    }
+			const rentalData = {
+				userId: Number(locals.user.id),
+				bookId,
+				returnDate: new Date(Date.now() + rentalDays * 24 * 60 * 60 * 1000),
+				status: 'rented'
+			};
 
-    const orderData = orderResult[0];
-    if (orderData.userId !== locals.user.id) {
-      throw error(403, 'Unauthorized');
-    }
+			await rentalService.createRental(rentalData);
 
-    if (orderData.status !== 'rented') {
-      throw error(400, 'This order is not a rental');
-    }
+			return { success: true };
+		} catch (err) {
+			console.error('Error creating rental:', err);
 
-    // Get the specific item
-    const itemResult = await db
-      .select()
-      .from(orderItem)
-      .where(eq(orderItem.id, orderItemId))
-      .limit(1);
+			if (err instanceof ZodError) {
+				const errors = {};
+				err.issues.forEach((issue) => {
+					const field = issue.path[0]?.toString();
+					if (field) {
+						errors[field] = issue.message;
+					}
+				});
+				return fail(400, { errors });
+			}
 
-    if (!itemResult.length) {
-      throw error(404, 'Item not found');
-    }
-
-    const item = itemResult[0];
-
-    // Restock this book
-    await db
-      .update(book)
-      .set({ stock: sql`${book.stock} + ${item.quantity}` })
-      .where(eq(book.id, item.bookId));
-
-    // Delete this order item
-    await db.delete(orderItem).where(eq(orderItem.id, orderItemId));
-
-    // Check if order has any items left
-    const remainingItems = await db
-      .select()
-      .from(orderItem)
-      .where(eq(orderItem.orderId, orderId));
-
-    // If no items left, mark order as fully returned
-    if (remainingItems.length === 0) {
-      await db
-        .update(order)
-        .set({ status: 'returned' })
-        .where(eq(order.id, orderId));
-    }
-
-    throw redirect(303, '/member');
-  }
+			return fail(500, {
+				errors: { general: err instanceof Error ? err.message : 'Failed to create rental' }
+			});
+		}
+	}
 };
