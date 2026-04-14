@@ -2,7 +2,6 @@
     import { enhance } from '$app/forms';
     import { page } from '$app/stores';
     let { form } = $props();
-    let redirectTo = $derived($page.url.searchParams.get('redirectTo') || '/Member');
 </script>
 
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
@@ -14,7 +13,7 @@
             </h3>
 
             <form method="post" action="?/signInEmail" use:enhance>
-                <input type="hidden" name="redirectTo" value={redirectTo} />
+                <input type="hidden" name="redirectTo" value={$page.url.searchParams.get('redirectTo') || '/member'} />
                 <div class="mb-3">
                     <label for="email" class="form-label">Email</label>
                     <input id="email" type="email" name="email" class="form-control" required />

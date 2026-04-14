@@ -5,7 +5,7 @@ import { APIError } from 'better-auth/api';
 export const load = async (event) => {
     if (event.locals.user) {
         const redirectTo = event.url.searchParams.get('redirectTo');
-        throw redirect(302, redirectTo || '/Member');
+        throw redirect(302, redirectTo || '/member');
     }
     return {};
 };
@@ -15,7 +15,7 @@ export const actions = {
         const formData = await event.request.formData();
         const email = formData.get('email')?.toString() ?? '';
         const password = formData.get('password')?.toString() ?? '';
-        const redirectTo = formData.get('redirectTo')?.toString() || '/Member';
+        const redirectTo = formData.get('redirectTo')?.toString() || '/member';
 
         try {
             await auth.api.signInEmail({

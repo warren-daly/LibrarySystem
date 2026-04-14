@@ -31,7 +31,7 @@
         if (error) {
             errorMessage = error.message || 'Registration failed.';
         } else {
-            window.location.href = '/Member';
+            window.location.href = '/member';
         }
     }
 </script>
