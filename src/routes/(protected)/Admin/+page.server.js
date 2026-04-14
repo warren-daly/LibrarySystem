@@ -10,7 +10,7 @@ export const load = async ({ locals }) => {
 	}
 
 	if (locals.user.role !== "ADMIN") {
-		throw redirect(302, '/users');
+		throw redirect(302, '/auth/login');
 	}
 
 	const books = await bookService.getAllBooks();

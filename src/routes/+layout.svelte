@@ -35,7 +35,7 @@ async function handleLogin(e) {
     } else {
         const params = new URLSearchParams(window.location.search);
         const redirectTo = params.get('redirectTo');
-        window.location.href = redirectTo || '/Member';
+        window.location.href = redirectTo || '/member';
     }
 }
 
@@ -51,12 +51,11 @@ async function handleLogin(e) {
     <a href="/about">About</a>
     <a href="/contact">Contact</a>
     <a href="/member">Member</a>
-
     {#if user}
         {#if user.role === 'ADMIN'}
             <a href="/admin">Admin</a>
     {/if}
-	
+
 	{#if data.user && data.cartCount > 0}
         <a href="/cart"><i class="bi bi-cart me-1"></i>Cart</a>
     {/if}
