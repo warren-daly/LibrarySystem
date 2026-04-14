@@ -11,7 +11,7 @@
         <div class="card-body">
           <h5 class="card-title">Register</h5>
           <p class="card-text">Register for an account.</p>
-          <a href="/register" class="btn btn-primary">Register</a>
+          <a href="/auth/register" class="btn btn-primary">Register</a>
         </div>
       </div>
     </div>
@@ -30,7 +30,7 @@
         <div class="card-body">
           <h5 class="card-title">Manage Your Rentals</h5>
           <p class="card-text">View your rented books and manage your account.</p>
-          <a href="/auth/login" class="btn btn-primary">My Rentals</a>
+          <a href="/member/rentals" class="btn btn-primary">My Rentals</a>
         </div>
       </div>
     </div>
