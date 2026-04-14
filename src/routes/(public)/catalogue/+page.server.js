@@ -19,10 +19,17 @@ export const actions = {
 
         const data = await request.formData();
         const bookId = Number(data.get('bookId'));
+        const type = data.get('type');
+
+        console.log('SERVER RECEIVED:', { bookId, type }); // Add this line
+        console.log('All form data:', Object.fromEntries(data)); // And this line
 
         if (!bookId) throw error(400, 'Invalid book');
+        if (!type || !['rent', 'buy'].includes(type)) {
+            throw error(400, 'Invalid type');
+        }
 
-        await cartService.addItem(locals.user.id, bookId, 1);
+        await cartService.addItem(locals.user.id, bookId, 1, type);
 
         return { success: true };
     }

@@ -6,7 +6,7 @@ export const ordersService = {
 
   async getOrderWithDetails(id) {
     const order = await ordersDataAccess.findByIdWithDetails(id);
-    if (!order) throw new NotFoundError('Rental not found');
+    if (!order) throw new NotFoundError('Order not found');
     return order;
   },
 
@@ -23,24 +23,42 @@ export const ordersService = {
       throw new Error('Cart is empty');
     }
 
-    const total = items.reduce((sum, i) => sum + (i.quantity * i.unitPrice), 0);
+    const rentalItems = items.filter(i => i.type === 'rent');
+    const purchaseItems = items.filter(i => i.type === 'buy');
 
-    // Set return date to 14 days from now
     const returnDate = new Date();
     returnDate.setDate(returnDate.getDate() + 14);
 
-    const orderData = {
-      userId: userId,
-      bookId: items[0].bookId,
-      status: 'rented',
-      total: total,
-      returnDate: returnDate
-    };
+    let lastOrderId = null;
 
-    const order = await ordersDataAccess.createFromCart(orderData, items);
+    // Create rental order if there are rentals
+    if (rentalItems.length > 0) {
+      const rentalOrderData = {
+        userId,
+        status: 'rented',
+        rentalDate: new Date(),
+        returnDate: returnDate,
+        total: rentalItems.reduce((sum, i) => sum + (i.quantity * i.unitPrice), 0)
+      };
+      const rentalOrder = await ordersDataAccess.createOrder(rentalOrderData, rentalItems);
+      lastOrderId = rentalOrder.id;
+    }
+
+    // Create purchase order if there are purchases
+    if (purchaseItems.length > 0) {
+      const purchaseOrderData = {
+        userId,
+        status: 'completed',
+        rentalDate: null,
+        returnDate: null,
+        total: purchaseItems.reduce((sum, i) => sum + (i.quantity * i.unitPrice), 0)
+      };
+      const purchaseOrder = await ordersDataAccess.createOrder(purchaseOrderData, purchaseItems);
+      lastOrderId = purchaseOrder.id;
+    }
 
     await cartDataAccess.clearCart(cart.id);
 
-    return order;
+    return { id: lastOrderId };
   }
 };

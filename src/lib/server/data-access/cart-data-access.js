@@ -1,6 +1,6 @@
 import { db } from '../db/index.js';
 import { cart, cartItem, book } from '../db/schema.js';
-import { eq, and } from 'drizzle-orm';
+import { eq, and, sql } from 'drizzle-orm';
 
 export const cartDataAccess = {
 
@@ -21,11 +21,19 @@ export const cartDataAccess = {
     return created[0] ?? null;
   },
 
-  async addItem(cartId, bookId, quantity) {
+  async addItem(cartId, bookId, quantity, type = 'buy') {
+    console.log(`cartDataAccess.addItem called with: cartId=${cartId}, bookId=${bookId}, quantity=${quantity}, type=${type}`);
+    
     const result = await db
       .select()
       .from(cartItem)
-      .where(and(eq(cartItem.cartId, cartId), eq(cartItem.bookId, bookId)))
+      .where(
+        and(
+          eq(cartItem.cartId, cartId),
+          eq(cartItem.bookId, bookId),
+          eq(cartItem.type, type)
+        )
+      )
       .limit(1);
 
     if (result[0]) {
@@ -35,14 +43,16 @@ export const cartDataAccess = {
         .where(eq(cartItem.id, result[0].id))
         .returning();
 
+      console.log(`Updated existing item: ${JSON.stringify(updated[0])}`);
       return updated[0] ?? null;
     }
 
     const inserted = await db
       .insert(cartItem)
-      .values({ cartId, bookId, quantity })
+      .values({ cartId, bookId, quantity, type })
       .returning();
 
+    console.log(`Inserted new item: ${JSON.stringify(inserted[0])}`);
     return inserted[0] ?? null;
   },
 
@@ -51,9 +61,10 @@ export const cartDataAccess = {
       .select({
         id: cartItem.id,
         quantity: cartItem.quantity,
+        type: cartItem.type,
         bookId: book.id,
         title: book.title,
-        unitPrice: book.price
+        unitPrice: sql`CASE WHEN ${cartItem.type} = 'rent' THEN 0 ELSE ${book.price} END`
       })
       .from(cartItem)
       .innerJoin(book, eq(cartItem.bookId, book.id))

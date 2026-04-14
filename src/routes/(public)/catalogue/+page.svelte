@@ -1,13 +1,18 @@
 <script>
     import { enhance } from '$app/forms';
+    import { invalidateAll } from '$app/navigation';
 
     let { data } = $props();
-    let added = $state({});
+    let cartItems = $state({}); // Track each book + type combination
 
     const euro = new Intl.NumberFormat('en-IE', {
         style: 'currency',
         currency: 'EUR'
     });
+
+    function getItemKey(bookId, type) {
+        return `${bookId}-${type}`;
+    }
 </script>
 
 <div class="container mt-5">
@@ -37,16 +42,63 @@
                             <span class="badge bg-success mb-2">Available</span>
                         {/if}
 
-                        <form method="post" action="?/addToCart" use:enhance={() => { added[b.id] = true; }}>
-                            <input type="hidden" name="bookId" value={b.id} />
-                            <button type="submit" class="btn btn-primary w-100 mt-2" disabled={added[b.id] || b.stock === 0}>
-                                {#if added[b.id]}
-                                    <i class="bi bi-check-circle me-2"></i> Added
-                                {:else}
-                                    <i class="bi bi-cart-plus me-2"></i> Rent Book
-                                {/if}
-                            </button>
-                        </form>
+                        <div class="d-flex flex-column gap-2 mt-2">
+                            <!-- Rent Button -->
+                            <form 
+                                method="post" 
+                                action="?/addToCart" 
+                                use:enhance={({ formData }) => {
+                                    console.log('Rent form submitted:', {
+                                        bookId: formData.get('bookId'),
+                                        type: formData.get('type')
+                                    });
+                                    return async ({ result }) => {
+                                        if (result.type === 'success') {
+                                            cartItems[getItemKey(b.id, 'rent')] = true;
+                                            await invalidateAll();
+                                        }
+                                    };
+                                }}
+                            >
+                                <input type="hidden" name="bookId" value={b.id} />
+                                <input type="hidden" name="type" value="rent" />
+                                <button type="submit" class="btn btn-primary w-100" disabled={cartItems[getItemKey(b.id, 'rent')] || b.stock === 0}>
+                                    {#if cartItems[getItemKey(b.id, 'rent')]}
+                                        <i class="bi bi-check-circle me-2"></i> Rented
+                                    {:else}
+                                        <i class="bi bi-book me-2"></i> Rent Book
+                                    {/if}
+                                </button>
+                            </form>
+
+                            <!-- Buy Button -->
+                            <form 
+                                method="post" 
+                                action="?/addToCart" 
+                                use:enhance={({ formData }) => {
+                                    console.log('Buy form submitted:', {
+                                        bookId: formData.get('bookId'),
+                                        type: formData.get('type')
+                                    });
+                                    return async ({ result }) => {
+                                        if (result.type === 'success') {
+                                            cartItems[getItemKey(b.id, 'buy')] = true;
+                                            await invalidateAll();
+                                        }
+                                    };
+                                }}
+                            >
+                                <input type="hidden" name="bookId" value={b.id} />
+                                <input type="hidden" name="type" value="buy" />
+                                <button type="submit" class="btn btn-success w-100" disabled={cartItems[getItemKey(b.id, 'buy')] || b.stock === 0}>
+                                    {#if cartItems[getItemKey(b.id, 'buy')]}
+                                        <i class="bi bi-check-circle me-2"></i> Bought
+                                    {:else}
+                                        <i class="bi bi-bag me-2"></i> Buy Book
+                                    {/if}
+                                </button>
+                            </form>
+                        </div>
                     </div>
                 </div>
             </div>
