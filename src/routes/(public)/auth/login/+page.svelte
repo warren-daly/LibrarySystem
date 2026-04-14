@@ -25,6 +25,8 @@
                     <input id="password" type="password" name="password" class="form-control" required />
                 </div>
 
+                <a href="/auth/forgot-password" class="small text-decoration-none">Forgot password?</a>
+
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-box-arrow-in-right me-1"></i> Login
                 </button>

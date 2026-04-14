@@ -12,8 +12,8 @@
         e.preventDefault();
         errorMessage = '';
 
-        if (password.length < 6) {
-            errorMessage = 'Password must be at least 6 characters long.';
+        if (password.length < 8) {
+            errorMessage = 'Password must be at least 8 characters long.';
             return;
         }
 
@@ -54,7 +54,7 @@
 
             <label for="pwd">Create a password:</label><br>
             <input type="password" id="pwd" name="pwd" bind:value={password} required minlength="6">
-            <small class="password-hint">Passwords must be at least 6 characters long.</small><br><br>
+            <small class="password-hint">Passwords must be at least 8 characters long.</small><br><br>
 
             <label for="confirmPwd">Confirm password:</label><br>
             <input type="password" id="confirmPwd" name="confirmPwd"  bind:value={confirmPassword} required minlength="6"><br><br>
@@ -63,8 +63,12 @@
             	<p style="color:red;">{errorMessage}</p>
         	{/if}
 
-            <input type="submit" value="Submit" class="submit-btn">
-            <input type="reset" value="Reset" class="reset-btn"><br><br><br>
+            <button type="submit" class="btn btn-primary w-100">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Submit
+            </button>
+            <button type="reset" class="btn w-100">
+                <i class="bi bi-box-arrow-in-right me-1"></i> Reset
+            </button><br><br><br>
         </form>
     </div>
 
@@ -99,10 +103,6 @@
 		width: 100%;
 		padding: 6px;
 	}
-
-	.submit-btn, .reset-btn {
-		margin-top: 10px;
-		padding: 8px;
-	}
+    
 </style>
 
