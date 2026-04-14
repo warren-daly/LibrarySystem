@@ -1,6 +1,7 @@
 import { ordersDataAccess } from '../data-access/orders-data-access.js';
 import { cartDataAccess } from '../data-access/cart-data-access.js';
 import { NotFoundError } from '../utils/errors.js';
+import { notifyOrderCreated } from '../notifications/order-notifications.js';
 
 export const ordersService = {
 
@@ -59,6 +60,11 @@ export const ordersService = {
 
     await cartDataAccess.clearCart(cart.id);
 
-    return { id: lastOrderId };
-  }
+    // Send email - if it fails to send, the function will continue (non blocking)
+    notifyOrderCreated({ order, user }).catch(err => {
+      console.error('Order created but email failed', err);
+    });
+    
+    return order;
+  },
 };

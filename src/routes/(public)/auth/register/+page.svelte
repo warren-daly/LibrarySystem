@@ -31,9 +31,22 @@
         if (error) {
             errorMessage = error.message || 'Registration failed.';
         } else {
-            window.location.href = '/member';
+            try {
+                await fetch('/api/send-registration-email', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        email,
+                        name: `${firstName} ${lastName}`
+                    })
+                });
+            } catch (err) {
+                console.error('Registration email failed:', err);
+            }
+
+            window.location.href = '/';
         }
-    }
+    }    
 </script>
 
 <h1 class="heading1">Register As a Member</h1>

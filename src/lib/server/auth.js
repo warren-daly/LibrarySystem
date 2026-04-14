@@ -4,6 +4,7 @@ import { sveltekitCookies } from 'better-auth/svelte-kit';
 import { env } from '$env/dynamic/private';
 import { getRequestEvent } from '$app/server';
 import { db } from '$lib/server/db';
+import { sendPasswordResetEmail } from '$lib/server/email/email-service';
 
 export const auth = betterAuth({
 	baseURL: env.ORIGIN,
@@ -20,10 +21,13 @@ export const auth = betterAuth({
 	emailAndPassword: {
 		enabled: true,
 		sendResetPassword: async ({ user, url }) => {
-			console.log('Send reset link to:', user.email);
-			console.log('Reset URL:', url);
+			await sendPasswordResetEmail({
+				to: user.email,
+				url
+			});
+			console.log('Password reset email sent to', user.email);
 		}
 	},
 
 	plugins: [sveltekitCookies(getRequestEvent)]
-	});
+});
