@@ -50,7 +50,7 @@ async function handleLogin(e) {
     <a href="/catalogue">Catalogue</a>
     <a href="/about">About</a>
     <a href="/contact">Contact</a>
-    <a href="/member">Member</a>
+    <a href="/auth/login">Member</a>
     {#if user}
         {#if user.role === 'ADMIN'}
             <a href="/admin">Admin</a>

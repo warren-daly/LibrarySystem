@@ -30,7 +30,7 @@
         <div class="card-body">
           <h5 class="card-title">Manage Your Rentals</h5>
           <p class="card-text">View your rented books and manage your account.</p>
-          <a href="/member/rentals" class="btn btn-primary">My Rentals</a>
+          <a href="/auth/login" class="btn btn-primary">My Rentals</a>
         </div>
       </div>
     </div>
