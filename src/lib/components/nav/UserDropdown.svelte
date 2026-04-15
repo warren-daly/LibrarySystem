@@ -94,22 +94,23 @@
 }
 
 .dropdown > button {
-	border-radius: 0.5rem;
+	border-radius: 0.5rem 0 0 0.5rem;
 	padding: 0.4rem 0.9rem;
 	font-weight: 500;
 }
 
 .dropdown-content {
 	position: absolute;
-	top: 110%;
+	top: 100%;
 	right: 0;
 	background-color: #ffffff;
 	min-width: 180px;
-	border-radius: 0.75rem;
+	border-radius: 0 0 0.75rem 0;
 	box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
 	padding: 0.5rem 0;
 	display: none;
 	z-index: 1000;
+	font-weight: bold;
 }
 
 /* show dropdown */
@@ -129,6 +130,7 @@
 	cursor: pointer;
 	border-radius: 0.5rem;
 	transition: background 0.2s ease;
+	font-weight: bold;
 }
 
 /* hover effect */
