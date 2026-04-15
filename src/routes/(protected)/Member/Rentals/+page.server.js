@@ -2,6 +2,8 @@ import { rentalService } from '$lib/server/services/rental-service.js';
 import { bookService } from '$lib/server/services/books-service.js';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { ZodError } from 'zod';
+import { sendReturnConfirmationEmail } from '$lib/server/email/email-service.js';
+import { sendLateReturnEmail } from '$lib/server/email/email-service.js';
 
 export async function load({ url, locals }) {
 	try {
@@ -113,6 +115,16 @@ export const actions = {
 					status: 'late'
 				});
 
+				const book = await bookService.getBookById(existingRental.bookId);
+
+				sendLateReturnEmail({
+					to: locals.user.email,
+					bookTitle: book?.title ?? `Book ID ${existingRental.bookId}`,
+					returnDate: existingRental.returnDate
+				}).catch((err) => {
+					console.error('Late return email failed:', err);
+				});
+
 				throw redirect(303, `/member/late-fee/${id}`);
 			}
 
@@ -120,6 +132,15 @@ export const actions = {
 				bookId: existingRental.bookId,
 				returnDate: existingRental.returnDate,
 				status: 'returned'
+			});
+
+			const book = await bookService.getBookById(existingRental.bookId);
+
+			sendReturnConfirmationEmail({
+				to: locals.user.email,
+				bookTitle: book?.title ?? `Book ID ${existingRental.bookId}`
+			}).catch((err) => {
+				console.error('Return confirmation email failed:', err);
 			});
 
 			return { success: true };

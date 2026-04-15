@@ -2,6 +2,7 @@ import { rentalService } from '$lib/server/services/rental-service.js';
 import { bookService } from '$lib/server/services/books-service.js';
 import { error, fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
+import { sendRentalConfirmationEmail } from '$lib/server/email/email-service.js';
 
 export async function load({ url, locals }) {
 	try {
@@ -58,6 +59,16 @@ export const actions = {
 			};
 
 			await rentalService.createRental(rentalData);
+
+			const book = await bookService.getBookById(bookId);
+
+			sendRentalConfirmationEmail({
+				to: locals.user.email,
+				bookTitle: book?.title ?? `Book ID ${bookId}`,
+				returnDate: rentalData.returnDate
+			}).catch((err) => {
+				console.error('Rental confirmation email failed:', err);
+			});
 
 			return { success: true };
 		} catch (err) {
