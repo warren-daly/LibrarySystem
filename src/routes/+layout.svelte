@@ -1,4 +1,5 @@
 <script>
+	
 	import 'bootstrap/dist/css/bootstrap.min.css';
 	import 'bootstrap-icons/font/bootstrap-icons.min.css';
 	import GuestMenu from '$lib/components/nav/GuestMenu.svelte';
@@ -53,3 +54,9 @@
 <main class="app-main">
 	{@render children()}
 </main>
+
+<style>
+  .app-main {
+    padding-top: 50px; 
+  }
+</style>
