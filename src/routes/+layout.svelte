@@ -1,115 +1,55 @@
 <script>
-import favicon from '$lib/assets/favicon.svg';
-import { onMount } from 'svelte';
-import { browser } from '$app/environment';
-import 'bootstrap/dist/css/bootstrap.min.css';
-import 'bootstrap-icons/font/bootstrap-icons.min.css';
-import { page } from '$app/stores';
-import { authClient } from '$lib/auth-client';
+	import 'bootstrap/dist/css/bootstrap.min.css';
+	import 'bootstrap-icons/font/bootstrap-icons.min.css';
+	import GuestMenu from '$lib/components/nav/GuestMenu.svelte';
+	import MemberMenu from '$lib/components/nav/MemberMenu.svelte';
+	import AdminMenu from '$lib/components/nav/AdminMenu.svelte';
+	import UserDropdown from '$lib/components/nav/UserDropdown.svelte';
 
-let error = $derived($page.url.searchParams.get('error'));
-
-onMount(async () => {
-    if (browser) {
-        console.log('Loading Bootstrap');
-        await import('bootstrap');
-    }
-});
-
-let { data, children } = $props();
-let user = $derived(data.user);
-
-
-let email = $state('');
-let password = $state('');
-let loginError = $state('');
-
-async function handleLogin(e) {
-    e.preventDefault();
-    loginError = '';
-
-    const { error: authError } = await authClient.signIn.email({ email, password });
-
-    if (authError) {
-        loginError = authError.message || 'Invalid email or password';
-    } else {
-        const params = new URLSearchParams(window.location.search);
-        const redirectTo = params.get('redirectTo');
-        window.location.href = redirectTo || '/member';
-    }
-}
-
+	let { data, children } = $props();
+	let user = $derived(data.user);
+	let cartCount = $derived(data.cartCount ?? 0);
 </script>
 
-<svelte:head>
-	<link rel="icon" href={favicon} />
-</svelte:head>
+<header>
+	<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
+		<div class="container">
+			<a class="navbar-brand fw-semibold" href="/">
+				<i class="bi bi-book me-2" aria-hidden="true"></i>
+				Online Library
+			</a>
 
-<nav>
-    <a href="/">Home</a>
-    <a href="/catalogue">Catalogue</a>
-    <a href="/about">About</a>
-    <a href="/contact">Contact</a>
-    <a href="/Member">Member</a>
-    {#if user}
-        {#if user.role === 'ADMIN'}
-            <a href="/Admin">Admin</a>
-    {/if}
-
-	{#if data.user && data.cartCount > 0}
-        <a href="/cart"><i class="bi bi-cart me-1"></i>Cart</a>
-    {/if}
-	<div class="dropdown">
-    	<span>Welcome, {user.name}!</span>
-		<div class="logout">
-    		<button onclick={() => authClient.signOut().then(() => window.location.href = '/')}>
-    			Logout
+			<button
+				class="navbar-toggler"
+				type="button"
+				data-bs-toggle="collapse"
+				data-bs-target="#mainNavbar"
+				aria-controls="mainNavbar"
+				aria-expanded="false"
+				aria-label="Toggle navigation"
+			>
+				<span class="navbar-toggler-icon"></span>
 			</button>
+
+			<div class="collapse navbar-collapse" id="mainNavbar">
+				<ul class="navbar-nav me-auto mb-2 mb-lg-0">
+					<GuestMenu />
+
+					{#if user?.role === 'MEMBER'}
+						<MemberMenu {cartCount} />
+					{:else if user?.role === 'ADMIN'}
+						<AdminMenu />
+					{/if}
+				</ul>
+
+				<ul class="navbar-nav ms-auto">
+					<UserDropdown {user} />
+				</ul>
+			</div>
 		</div>
-	</div>
-	{:else}
-	<div class="dropdown">
-    	<button class="dropdown-btn">Login</button>
-    	<div class="dropdown-content">
-    	    <form onsubmit={handleLogin}>
-    	        <label for="email">Email:</label>
-    	        <input type="text" id="email" name="email" bind:value={email} />
-    	        <label for="password">Password:</label>
-    	        <input type="password" id="password" name="password" bind:value={password} />
-    	        <input type="submit" value="Submit" />
-    	        {#if loginError}
-			    	<p style="color:red">{loginError}</p>
-				{/if}
-    	    </form>
-    	</div>
-	</div>
-	{/if}
-</nav>
+	</nav>
+</header>
 
-{@render children()}
-
-<style>
-	.logout {
-		display: inline-block;
-	} 
-
-	.dropdown {
-		position: absolute;
-		top: 0.25em;
-		right: 0.5em;
-		display: inline-block;
-		flex-wrap: nowrap;
-	}
-
-	.dropdown-content {
-		background-color: white;
-		display: none;
-		right: 15%;
-		position: absolute;
-	}
-
-	.dropdown:hover .dropdown-content,
-	.dropdown:focus-within .dropdown-content {
-		display: block;
-	}
-</style>
+<main class="app-main">
+	{@render children()}
+</main>

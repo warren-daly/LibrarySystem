@@ -21,5 +21,9 @@ export const rentalDataAccess = {
 			},
 			orderBy: [desc(rental.id)]
 		});
-	}
+	},
+	async create(rentalData) {
+	const result = await db.insert(rental).values(rentalData).returning();
+	return result[0] ?? null;
+}
 };
