@@ -32,5 +32,16 @@ export const rentalService = {
 	async createRental(rentalData) {
 		const validated = insertRentalSchema.parse(rentalData);
 		return await rentalDataAccess.create(validated);
+	},
+
+	async updateRental(id, rentalData) {
+		const validated = idSchema.parse({ id });
+		const updated = await rentalDataAccess.update(validated.id, rentalData);
+		
+		if (!updated) {
+			throw new Error('Rental not found');
+		}
+		
+		return updated;
 	}
 };
