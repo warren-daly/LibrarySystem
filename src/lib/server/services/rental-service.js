@@ -28,5 +28,9 @@ export const rentalService = {
 		}
 
 		return rentals;
+	},
+	async createRental(rentalData) {
+		const validated = insertRentalSchema.parse(rentalData);
+		return await rentalDataAccess.create(validated);
 	}
 };

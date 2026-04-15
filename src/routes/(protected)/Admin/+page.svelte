@@ -22,7 +22,7 @@
 					<h2 class="my-3">{data.totalBooks}</h2>
 
 					<div class="mt-auto">
-						<a href="/Admin/books" class="btn btn-primary" aria-label="Manage books">
+						<a href="/admin/books" class="btn btn-primary" aria-label="Manage books">
 							<i class="bi bi-book me-1" aria-hidden="true"></i>
 							Manage Books
 						</a>
@@ -32,18 +32,18 @@
 		</div>
 
 		<div class="col-md-4">
-			<div class="card h-100 shadow-sm text-center" role="region" aria-label="Users overview">
+			<div class="card h-100 shadow-sm text-center" role="region" aria-label="Members overview">
 				<div class="card-body d-flex flex-column">
 					<i class="bi bi-people fs-1 text-success mb-2" aria-hidden="true"></i>
-					<h5 class="card-title">Users</h5>
+					<h5 class="card-title">Members</h5>
 					<p class="card-text">View and manage registered members.</p>
 
 					<h2 class="my-3">{data.totalUsers}</h2>
 
 					<div class="mt-auto">
-						<a href="/Admin/members" class="btn btn-primary" aria-label="Manage users">
+						<a href="/admin/members" class="btn btn-primary" aria-label="Manage Members">
 							<i class="bi bi-people me-1" aria-hidden="true"></i>
-							Manage Users
+							Manage Members
 						</a>
 					</div>
 				</div>
@@ -57,10 +57,10 @@
 					<h5 class="card-title">Rentals</h5>
 					<p class="card-text">Check and manage current rental records.</p>
 
-					<h5>Rentals: {data.totalRentals ?? 0}</h5>
+					<h2 class="my-3">{data.totalRentals ?? 0}</h2>
 
 					<div class="mt-auto">
-						<a href="/Admin/rentals" class="btn btn-primary" aria-label="Manage rentals">
+						<a href="/admin/rentals" class="btn btn-primary" aria-label="Manage rentals">
 							<i class="bi bi-receipt me-1" aria-hidden="true"></i>
 							Manage Rentals
 						</a>
@@ -74,7 +74,7 @@
 		<div class="card-body">
 			<h5 id="recent-users-title" class="card-title text-center mb-3">
 				<i class="bi bi-people me-2" aria-hidden="true"></i>
-				Recent Users
+				Recent Members
 			</h5>
 
 			<table class="table table-hover text-center" aria-describedby="recent-users-title">
@@ -93,10 +93,7 @@
 								<td>{user.name}</td>
 								<td>{user.email}</td>
 								<td>
-									<span
-										class={`badge ${user.role === 'ADMIN' ? 'bg-danger' : 'bg-secondary'}`}
-										aria-label={`User role: ${user.role}`}
-									>
+									<span class={`badge ${user.role === 'ADMIN' ? 'bg-danger' : 'bg-secondary'}`}>
 										{user.role}
 									</span>
 								</td>
@@ -104,7 +101,7 @@
 						{/each}
 					{:else}
 						<tr>
-							<td colspan="3" class="text-muted"> No users found </td>
+							<td colspan="3" class="text-muted">No users found</td>
 						</tr>
 					{/if}
 				</tbody>

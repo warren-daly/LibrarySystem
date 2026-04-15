@@ -87,7 +87,7 @@
 																type="submit"
 																class="btn btn-sm btn-outline-success"
 																aria-label="Return book"
-															>
+															> Return Book
 																<i class="bi bi-box-arrow-in-left"></i>
 															</button>
 														</form>
@@ -95,10 +95,10 @@
 
 													{#if r.status === 'late'}
 														<a
-															href={`/member/late-fee/${r.id}`}
+															href={`/member/fee/${r.id}`}
 															class="btn btn-sm btn-outline-danger"
 															aria-label="Pay late fee"
-														>
+														>Pay Late
 															<i class="bi bi-credit-card"></i>
 														</a>
 													{/if}
