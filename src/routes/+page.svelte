@@ -11,7 +11,7 @@
         <div class="card-body">
           <h5 class="card-title">Register</h5>
           <p class="card-text">Register for an account.</p>
-          <a href="/register" class="btn btn-primary">Register</a>
+          <a href="/auth/register" class="btn btn-primary">Register</a>
         </div>
       </div>
     </div>
