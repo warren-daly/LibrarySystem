@@ -50,10 +50,10 @@ async function handleLogin(e) {
     <a href="/catalogue">Catalogue</a>
     <a href="/about">About</a>
     <a href="/contact">Contact</a>
-    <a href="/auth/login">Member</a>
+    <a href="/Member">Member</a>
     {#if user}
         {#if user.role === 'ADMIN'}
-            <a href="/admin">Admin</a>
+            <a href="/Admin">Admin</a>
     {/if}
 
 	{#if data.user && data.cartCount > 0}

@@ -46,6 +46,18 @@ export async function sendPaymentConfirmationEmail({ to, amount }) {
 	});
 }
 
+export async function sendRentalConfirmationEmail({ to, bookTitle, returnDate }) {
+	await sendEmail({
+		to,
+		subject: 'Rental Confirmation',
+		html: `
+			<h2>Book Rental Confirmed</h2>
+			<p>You have successfully rented <strong>${bookTitle}</strong>.</p>
+			<p>Return date: ${new Date(returnDate).toLocaleDateString()}</p>
+		`
+	});
+}
+
 export async function sendReturnConfirmationEmail({ to, bookTitle }) {
 	await sendEmail({
 		to,
@@ -57,3 +69,15 @@ export async function sendReturnConfirmationEmail({ to, bookTitle }) {
 	});
 }
 
+export async function sendLateReturnEmail({ to, bookTitle, returnDate }) {
+	await sendEmail({
+		to,
+		subject: 'Late Return Notice',
+		html: `
+			<h2>Late Return Notice</h2>
+			<p>Your rental for <strong>${bookTitle}</strong> is overdue.</p>
+			<p>The due date was: ${new Date(returnDate).toLocaleDateString()}</p>
+			<p>A late fee will now apply before the return can be completed.</p>
+		`
+	});
+}

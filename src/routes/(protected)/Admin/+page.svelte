@@ -22,7 +22,7 @@
 					<h2 class="my-3">{data.totalBooks}</h2>
 
 					<div class="mt-auto">
-						<a href="/admin/books" class="btn btn-primary" aria-label="Manage books">
+						<a href="/Admin/books" class="btn btn-primary" aria-label="Manage books">
 							<i class="bi bi-book me-1" aria-hidden="true"></i>
 							Manage Books
 						</a>
@@ -41,7 +41,7 @@
 					<h2 class="my-3">{data.totalUsers}</h2>
 
 					<div class="mt-auto">
-						<a href="/admin/members" class="btn btn-primary" aria-label="Manage users">
+						<a href="/Admin/members" class="btn btn-primary" aria-label="Manage users">
 							<i class="bi bi-people me-1" aria-hidden="true"></i>
 							Manage Users
 						</a>
@@ -60,7 +60,7 @@
 					<h5>Rentals: {data.totalRentals ?? 0}</h5>
 
 					<div class="mt-auto">
-						<a href="/admin/rentals" class="btn btn-primary" aria-label="Manage rentals">
+						<a href="/Admin/rentals" class="btn btn-primary" aria-label="Manage rentals">
 							<i class="bi bi-receipt me-1" aria-hidden="true"></i>
 							Manage Rentals
 						</a>
