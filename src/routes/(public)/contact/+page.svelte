@@ -1,5 +1,35 @@
 <script>
+    let name = $state('');
+    let message = $state('');
+    let email = $state('');
+    let errorMessage = $state('');
 
+    async function handleSubmit(e) {
+        e.preventDefault();
+        errorMessage = '';
+
+        if (!name || !email || !message) {
+            errorMessage = 'Please fill in all fields.';
+            return;
+        }
+
+        try {
+            await fetch('/api/send-contact-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email,
+                    name,
+                    message
+                })
+            });
+
+            window.location.href = '/';
+        } catch (err) {
+            console.error('Contact email failed:', err);
+            errorMessage = 'Failed to send message.';
+        }
+    }    
 </script>
 
 <div class="container py-5">
@@ -22,17 +52,23 @@
         </div>
 
         <div class="col-md-8">
-            <div class="h-100 py-3 text-center">                
-                <form method="POST" action="/">
+            <div class="h-100 py-3 text-center">
+                {#if errorMessage}
+                    <div class="alert alert-danger" role="alert">
+                        {errorMessage}
+                    </div>
+                {/if}
+                
+                <form on:submit={handleSubmit}>
                 <div class="form-grid">
                     <label for="name">Name:</label>
-                    <input type="text" id="name" name="name"/>
+                    <input type="text" id="name" name="name" bind:value={name}/>
                 
                     <label for="email">Email:</label>
-                    <input type="text" id="email" name="email"/>
+                    <input type="email" id="email" name="email" bind:value={email}/>
                 
-                    <label for="text">Message:</label>
-                    <textarea id="text" name="text" rows="5"></textarea>
+                    <label for="message">Message:</label>
+                    <textarea id="message" name="message" rows="5" bind:value={message}></textarea>
                 
                     <div></div>
                     <input type="submit" value="Submit"/>

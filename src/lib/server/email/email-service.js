@@ -2,6 +2,7 @@ import { Resend } from 'resend';
 import { env } from '$env/dynamic/private';
 
 const resend = new Resend(env.RESEND_API_KEY);
+export const resend_email = (env.RESEND_EMAIL)
 
 export async function sendEmail({ to, subject, html }) {
 	await resend.emails.send({
@@ -78,6 +79,20 @@ export async function sendLateReturnEmail({ to, bookTitle, returnDate }) {
 			<p>Your rental for <strong>${bookTitle}</strong> is overdue.</p>
 			<p>The due date was: ${new Date(returnDate).toLocaleDateString()}</p>
 			<p>A late fee will now apply before the return can be completed.</p>
+		`
+	});
+}
+
+export async function sendContactEmail({ name, email, message, to }) {
+	await sendEmail({
+		to,
+		subject: `New contact from ${name}`,
+		html: `
+			<h2>New Contact Message</h2>
+			<p><strong>Name:</strong> ${name}</p>
+			<p><strong>Email:</strong> ${email}</p>
+			<p><strong>Message:</strong></p>
+			<p>${message.replace(/\n/g, '<br>')}</p>
 		`
 	});
 }

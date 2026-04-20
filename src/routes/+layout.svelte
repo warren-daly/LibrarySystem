@@ -1,16 +1,22 @@
 <script>
-	
+	import { browser } from '$app/environment';
 	import 'bootstrap/dist/css/bootstrap.min.css';
 	import 'bootstrap-icons/font/bootstrap-icons.min.css';
+	
+	if (browser) {
+		import('bootstrap');
+	}
+	
 	import GuestMenu from '$lib/components/nav/GuestMenu.svelte';
 	import MemberMenu from '$lib/components/nav/MemberMenu.svelte';
 	import AdminMenu from '$lib/components/nav/AdminMenu.svelte';
 	import UserDropdown from '$lib/components/nav/UserDropdown.svelte';
 
 	let { data, children } = $props();
-	let user = $derived(data.user);
-	let cartCount = $derived(data.cartCount ?? 0);
+	let user = $derived(data?.user);
+	let cartCount = $derived(data?.cartCount ?? 0);
 </script>
+
 
 <header>
 	<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
