@@ -33,6 +33,21 @@
 							{euro.format(b.price / 100)}
 						</p>
 
+						{#if b.averageRating}
+							<p class="card-text">
+								<strong>Rating:</strong>
+								<span class="rating-stars">
+									{#each Array(5) as _, i}
+										<i class="bi bi-star{i < Math.round(b.averageRating) ? '-fill' : ''} rating-star"></i>
+									{/each}
+								</span>
+								<span class="badge bg-warning text-dark ms-2">{b.averageRating} / 5</span>
+								<small>({b.reviewCount} reviews)</small>
+							</p>
+						{:else}
+							<p class="card-text text-muted">No reviews yet</p>
+						{/if}
+
 						{#if b.stock === 0}
 							<span class="badge bg-danger mb-2">Out of Stock</span>
 						{:else}
@@ -84,3 +99,15 @@
 		{/each}
 	</div>
 </div>
+
+<style>
+	.rating-stars {
+		color: #ffc107;
+		font-size: 0.9rem;
+		letter-spacing: 0.2rem;
+	}
+
+	.rating-star {
+		margin-right: 0.2rem;
+	}
+</style>
