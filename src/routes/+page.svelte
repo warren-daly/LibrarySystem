@@ -30,7 +30,7 @@
         <div class="card-body">
           <h5 class="card-title">Manage Your Rentals</h5>
           <p class="card-text">View your rented books and manage your account.</p>
-          <a href="/auth/login" class="btn btn-primary">My Rentals</a>
+          <a href="/member/rentals" class="btn btn-primary">My Rentals</a>
         </div>
       </div>
     </div>
@@ -64,5 +64,6 @@
     transform: translateY(1px);
     box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.1);
   }
+  
 
 </style>

@@ -22,8 +22,28 @@ export const rental = sqliteTable('rental', {
 	status: text().notNull().default('rented')
 });
 
+export const review = sqliteTable('review', {
+  id: integer().primaryKey({ autoIncrement: true }),
+  bookId: integer().notNull(),
+  userId: integer().notNull(),
+  rating: integer().notNull(), // 1-5
+  reviewText: text(),
+  createdAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now') * 1000)`),
+  updatedAt: integer({ mode: 'timestamp_ms' })
+    .notNull()
+    .default(sql`(strftime('%s', 'now') * 1000)`)
+});
+
+export const reviewRelations = relations(review, ({ one }) => ({
+  user: one(user, { fields: [review.userId], references: [user.id] }),
+  book: one(book, { fields: [review.bookId], references: [book.id] })
+}));
+
 export const userRelations = relations(user, ({ many }) => ({
-	rentals: many(rental)
+	rentals: many(rental),
+  reviews: many(review)
 }));
 
 export const rentalRelations = relations(rental, ({ one }) => ({
@@ -32,7 +52,8 @@ export const rentalRelations = relations(rental, ({ one }) => ({
 }));
 
 export const bookRelations = relations(book, ({ many }) => ({
-	rentals: many(rental)
+	rentals: many(rental),
+  reviews: many(review)
 }));
 
 

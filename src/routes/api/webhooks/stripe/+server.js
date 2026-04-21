@@ -3,6 +3,11 @@ import { json } from '@sveltejs/kit';
 import { ordersService } from '$lib/server/services/orders-service.js';
 import { STRIPE_WEBHOOK_SECRET } from '$env/static/private';
 
+import { db } from '$lib/server/db';
+import { order } from '$lib/server/db/schema.js';
+import { cartService } from '$lib/server/services/cart-service.js';
+import { eq } from 'drizzle-orm';
+
 /**
  * Stripe Webhook Endpoint
  * Receives events from Stripe (e.g. checkout.session.completed)
@@ -29,27 +34,41 @@ export const POST = async ({ request }) => {
   console.log(`✅ Webhook received: ${event.type}`);
 
   if (event.type === 'checkout.session.completed') {
-    const session = event.data.object;
-    const orderId = Number(session.metadata?.orderId);
-    const paymentIntentId = session.payment_intent;
+  const session = event.data.object;
+  const orderId = Number(session.metadata?.orderId);
 
-    if (!orderId) {
-      console.warn('⚠️  checkout.session.completed without orderId metadata');
-      return json({ received: true });
-    }
-
-    try {
-      await ordersService.updateOrder(orderId, {
-        status: 'paid',
-        paymentIntentId
-      });
-
-      console.log(`✅ Order #${orderId} marked as paid`);
-    } catch (err) {
-      console.error(`❌ Failed to update order #${orderId}:`, err);
-      return new Response('Internal Server Error', { status: 500 });
-    }
+  if (!orderId) {
+    console.warn('⚠️ No orderId in metadata');
+    return json({ received: true });
   }
+
+  try {
+    // Mark order as paid
+    await db
+      .update(order)
+      .set({ status: 'paid' })
+      .where(eq(order.id, orderId));
+
+    // Clear the user's cart
+    const orderData = await db
+      .select()
+      .from(order)
+      .where(eq(order.id, orderId))
+      .limit(1);
+    
+    if (orderData.length > 0) {
+      const cart = await cartService.getOrCreateCart(orderData[0].userId);
+      await cartService.clearCart(cart.id);
+    }
+
+    console.log(`✅ Order #${orderId} paid and cart cleared`);
+  } catch (err) {
+    console.error(`❌ Failed to process order #${orderId}:`, err);
+    return new Response('Internal Server Error', { status: 500 });
+  }
+}
+
+return json({ received: true });
 
   return json({ received: true });
 };

@@ -1,9 +1,10 @@
 import { rentalService } from '$lib/server/services/rental-service.js';
 import { bookService } from '$lib/server/services/books-service.js';
+import { db } from '$lib/server/db';
+import { review } from '$lib/server/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
+import { eq, and } from 'drizzle-orm';
 import { ZodError } from 'zod';
-import { sendReturnConfirmationEmail } from '$lib/server/email/email-service.js';
-import { sendLateReturnEmail } from '$lib/server/email/email-service.js';
 
 export async function load({ url, locals }) {
 	try {
@@ -15,8 +16,26 @@ export async function load({ url, locals }) {
 			? rentals.filter((r) => Number(r.userId) === Number(locals.user.id))
 			: [];
 
+		// Check for existing reviews for each rental
+		const rentalsWithReviewStatus = await Promise.all(
+			memberRentals.map(async (r) => {
+				const existingReview = await db.query.review.findFirst({
+					where: and(
+						eq(review.bookId, r.bookId),
+						eq(review.userId, locals.user.id)
+					)
+				});
+
+				return {
+					...r,
+					hasReview: !!existingReview,
+					rating: existingReview?.rating || null
+				};
+			})
+		);
+
 		return {
-			rentals: memberRentals,
+			rentals: rentalsWithReviewStatus,
 			books,
 			selectedBookId: selectedBookId ? Number(selectedBookId) : null,
 			currentUser: locals.user ?? null
@@ -115,16 +134,6 @@ export const actions = {
 					status: 'late'
 				});
 
-				const book = await bookService.getBookById(existingRental.bookId);
-
-				sendLateReturnEmail({
-					to: locals.user.email,
-					bookTitle: book?.title ?? `Book ID ${existingRental.bookId}`,
-					returnDate: existingRental.returnDate
-				}).catch((err) => {
-					console.error('Late return email failed:', err);
-				});
-
 				throw redirect(303, `/member/late-fee/${id}`);
 			}
 
@@ -132,15 +141,6 @@ export const actions = {
 				bookId: existingRental.bookId,
 				returnDate: existingRental.returnDate,
 				status: 'returned'
-			});
-
-			const book = await bookService.getBookById(existingRental.bookId);
-
-			sendReturnConfirmationEmail({
-				to: locals.user.email,
-				bookTitle: book?.title ?? `Book ID ${existingRental.bookId}`
-			}).catch((err) => {
-				console.error('Return confirmation email failed:', err);
 			});
 
 			return { success: true };
@@ -165,6 +165,49 @@ export const actions = {
 			return fail(500, {
 				errors: { general: err instanceof Error ? err.message : 'Failed to return rental' }
 			});
+		}
+	},
+
+	LeaveReview: async ({ request, locals }) => {
+		try {
+			const data = await request.formData();
+			const bookId = Number(data.get('bookId'));
+			const rating = Number(data.get('rating'));
+			const reviewText = data.get('reviewText') || null;
+			const userId = locals.user.id;
+
+			if (!bookId || !rating) {
+				return fail(400, { error: 'Book and rating are required' });
+			}
+
+			if (rating < 1 || rating > 5) {
+				return fail(400, { error: 'Rating must be between 1 and 5' });
+			}
+
+			// Check if user already reviewed this book
+			const existingReview = await db.query.review.findFirst({
+				where: and(
+					eq(review.bookId, bookId),
+					eq(review.userId, userId)
+				)
+			});
+
+			if (existingReview) {
+				return fail(400, { error: 'You have already reviewed this book' });
+			}
+
+			// Create new review
+			await db.insert(review).values({
+				bookId,
+				userId,
+				rating,
+				reviewText
+			});
+
+			return { success: true, message: 'Review submitted successfully!' };
+		} catch (error) {
+			console.error('Error creating review:', error);
+			return fail(500, { error: 'Failed to submit review' });
 		}
 	}
 };

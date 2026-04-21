@@ -21,5 +21,18 @@ export const rentalDataAccess = {
 			},
 			orderBy: [desc(rental.id)]
 		});
+	},
+	async create(rentalData) {
+	const result = await db.insert(rental).values(rentalData).returning();
+	return result[0] ?? null;
+},
+
+	async update(id, rentalData) {
+		const result = await db
+			.update(rental)
+			.set(rentalData)
+			.where(eq(rental.id, id))
+			.returning();
+		return result[0] ?? null;
 	}
 };

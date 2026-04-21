@@ -1,42 +1,17 @@
-import { error } from '@sveltejs/kit';
 import { db } from '$lib/server/db';
-import { order, orderItem, book } from '$lib/server/db/schema';
+import { order, orderItem, book } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
-import { stripe } from '$lib/server/stripe.js';
+import { error } from '@sveltejs/kit';
 
-export async function load({ url, params, locals }) {
-  if (!locals.user) {
-    throw error(401, 'Not authenticated');
-  }
-
-  const userId = Number(locals.user.id);
-  if (!Number.isInteger(userId)) {
-    throw error(401, 'Invalid user');
-  }
-
+export async function load({ params, locals }) {
+  if (!locals.user) throw error(401, 'Not authenticated');
 
   const orderId = Number(params.id);
   if (!Number.isInteger(orderId) || orderId < 1) {
     throw error(400, 'Invalid order ID');
   }
 
-  const sessionId = url.searchParams.get('session_id');
-  if (sessionId) {
-    try {
-      const session = await stripe.checkout.sessions.retrieve(sessionId);
-
-      // Ensure payment is complete
-      if (session.payment_status !== 'paid') {
-        throw error(400, 'Payment not completed');
-      }
-
-      console.log(`✅ Payment verified for order #${orderId}`);
-    } catch (err) {
-      console.error(`❌ Stripe verification failed:`, err);
-      throw error(400, 'Payment verification failed');
-    }
-  }
-
+  // Get the order
   const orderResult = await db
     .select()
     .from(order)
@@ -49,10 +24,12 @@ export async function load({ url, params, locals }) {
 
   const orderData = orderResult[0];
 
-  if (orderData.userId !== userId) {
+  // Verify user owns this order
+  if (orderData.userId !== locals.user.id) {
     throw error(403, 'Access denied');
   }
 
+  // Get order items with book titles
   const items = await db
     .select()
     .from(orderItem)
@@ -65,25 +42,16 @@ export async function load({ url, params, locals }) {
       .from(book)
       .where(eq(book.id, item.bookId))
       .limit(1);
-
     itemsWithTitles.push({
       ...item,
       title: bookData[0]?.title || 'Unknown Book'
     });
   }
 
-  const total = itemsWithTitles.reduce((sum, i) => sum + (i.quantity * i.unitPrice), 0);
-
   return {
     order: {
-      id: orderId,
-      userId: orderData.userId,
-      rentalDate: orderData.rentalDate,
-      returnDate: orderData.returnDate,
-      status: orderData.status,
-      items: itemsWithTitles,
-      total: orderData.total || total,
-      paymentVerified: !!sessionId
+      ...orderData,
+      items: itemsWithTitles
     }
   };
 }

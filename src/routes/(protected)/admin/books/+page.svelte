@@ -72,7 +72,7 @@
 		<div class="d-flex flex-column justify-content-between align-items-center">
 			<h1 class="h3 mb-0 ">Books Management</h1>
 			<div class="row">
-				<div class="col-md-2 w-100">
+				<div class="col-md-2 w-100 py-1">
 					<button
 						type="button"
 						class="btn btn-success"
