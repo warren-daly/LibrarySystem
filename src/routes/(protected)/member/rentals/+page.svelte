@@ -92,7 +92,37 @@
 															</button>
 														</form>
 													{/if}
-
+													
+													{#if r.status === 'returned' && !r.hasReview}
+														<form method="POST" action="?/LeaveReview">
+															<input type="hidden" name="bookId" value={r.bookId} />
+															<div class="mb-2">
+																<label>Rating (1-5):</label>
+																<select name="rating" class="form-select form-select-sm" required>
+																	<option value="">Select rating</option>
+																	<option value="1">1 - Poor</option>
+																	<option value="2">2 - Fair</option>
+																	<option value="3">3 - Good</option>
+																	<option value="4">4 - Very Good</option>
+																	<option value="5">5 - Excellent</option>
+																</select>
+															</div>
+															<div class="mb-2">
+																<textarea name="reviewText" class="form-control form-control-sm" placeholder="Write a review (optional)" rows="3"></textarea>
+															</div>
+															<button type="submit" class="btn btn-sm btn-success">Submit Review</button>
+														</form>
+													{/if}
+													
+													{#if r.rating}
+														<div class="rating-stars">
+															{#each Array(5) as _, i}
+																<i class="bi bi-star{i < Math.round(r.rating) ? '-fill' : ''} rating-star"></i>
+															{/each}
+															<span class="ms-2">{r.rating} / 5</span>
+														</div>
+													{/if}
+													
 													{#if r.status === 'late'}
 														<a
 															href={`/member/fee/${r.id}`}
