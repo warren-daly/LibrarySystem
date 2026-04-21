@@ -1,25 +1,28 @@
 <script>
-	import { browser } from '$app/environment';
 	import 'bootstrap/dist/css/bootstrap.min.css';
 	import 'bootstrap-icons/font/bootstrap-icons.min.css';
-	
-	if (browser) {
-		import('bootstrap');
-	}
 	
 	import GuestMenu from '$lib/components/nav/GuestMenu.svelte';
 	import MemberMenu from '$lib/components/nav/MemberMenu.svelte';
 	import AdminMenu from '$lib/components/nav/AdminMenu.svelte';
 	import UserDropdown from '$lib/components/nav/UserDropdown.svelte';
-
+	
 	let { data, children } = $props();
 	let user = $derived(data?.user);
 	let cartCount = $derived(data?.cartCount ?? 0);
 </script>
 
-
 <header>
-	<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top">
+	<nav 
+		class="navbar navbar-expand-lg navbar-dark bg-dark shadow-sm fixed-top"
+		onmouseleave={() => {
+			const navbarCollapse = document.getElementById('mainNavbar');
+			const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+				toggle: false
+			});
+			bsCollapse.hide();
+		}}
+	>
 		<div class="container">
 			<a class="navbar-brand fw-semibold" href="/">
 				<i class="bi bi-book me-2" aria-hidden="true"></i>
@@ -34,6 +37,13 @@
 				aria-controls="mainNavbar"
 				aria-expanded="false"
 				aria-label="Toggle navigation"
+				onmouseenter={() => {
+					const navbarCollapse = document.getElementById('mainNavbar');
+					const bsCollapse = new bootstrap.Collapse(navbarCollapse, {
+						toggle: false
+					});
+					bsCollapse.show();
+				}}
 			>
 				<span class="navbar-toggler-icon"></span>
 			</button>
@@ -64,5 +74,41 @@
 <style>
   .app-main {
     padding-top: 50px; 
+  }
+
+  :global(.navbar-toggler) {
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+  }
+
+  :global(.navbar-toggler:focus),
+  :global(.navbar-toggler:hover) {
+    opacity: 1;
+  }
+
+  :global(.navbar-nav.ms-auto) {
+    align-items: center;
+  }
+
+  :global(.navbar-collapse.show) {
+    background-color: #212529;
+  }
+
+  /* Fix dropdown to stay within navbar on lg screens */
+  :global(.navbar-expand-lg .navbar-nav .dropdown-menu) {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    left: auto;
+  }
+
+  /* On mobile, keep dropdown inline */
+  @media (max-width: 991px) {
+    :global(.navbar-nav .dropdown-menu) {
+      position: static;
+      background-color: transparent;
+      border: none;
+      box-shadow: none;
+    }
   }
 </style>

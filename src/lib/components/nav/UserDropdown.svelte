@@ -135,7 +135,8 @@
 
 /* hover effect */
 .logout:hover {
-	background-color: #f1f3f5;
+	background-color: #ffffff;
+	font-weight: 600;
 }
 
 
