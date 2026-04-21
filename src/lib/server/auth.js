@@ -26,6 +26,7 @@ export const auth = betterAuth({
 				url
 			});
 			console.log('Password reset email sent to', user.email);
+			console.log('Reset URL', url);
 		}
 	},
 
