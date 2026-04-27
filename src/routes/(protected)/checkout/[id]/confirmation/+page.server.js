@@ -60,21 +60,26 @@ export async function load({ url, locals }) {
         
         return {
           bookTitle: bookData[0]?.title || 'Unknown Book',
-          type: item.type,
+          type: item.type === 'rent' ? 'Rental' : 'Purchase',
           quantity: item.quantity,
           price: `€${(item.unitPrice / 100).toFixed(2)}`
         };
       })
     );
 
+    // Format order data
+    const formattedOrder = {
+      id: orderData.id,
+      status: 'completed',
+      date: orderData.createdAt 
+        ? new Date(orderData.createdAt).toLocaleDateString('en-IE')
+        : 'N/A',
+      total: `€${(orderData.total / 100).toFixed(2)}`,
+      items: itemsWithTitles
+    };
+
     return {
-      order: {
-        id: orderData.id,
-        status: 'completed', // Now it's completed
-        date: new Date(orderData.createdAt).toLocaleDateString('en-IE'),
-        total: `€${(orderData.total / 100).toFixed(2)}`,
-        items: itemsWithTitles
-      }
+      order: formattedOrder
     };
   } catch (err) {
     console.error('Error loading order:', err);

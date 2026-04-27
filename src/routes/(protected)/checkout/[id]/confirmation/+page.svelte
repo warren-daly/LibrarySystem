@@ -1,19 +1,6 @@
 <script>
   let { data } = $props();
   const { order } = data;
-
-  const euro = new Intl.NumberFormat('en-IE', {
-    style: 'currency',
-    currency: 'EUR'
-  });
-
-  function getDaysUntilDue(returnDate) {
-    if (!returnDate) return null;
-    const today = new Date();
-    const due = new Date(returnDate);
-    const daysLeft = Math.ceil((due - today) / (1000 * 60 * 60 * 24));
-    return daysLeft;
-  }
 </script>
 
 <div class="container mt-5">
@@ -28,13 +15,8 @@
     </div>
     <div class="card-body">
       <p><strong>Status:</strong> <span class="badge bg-success">{order.status}</span></p>
-      <p><strong>Order Date:</strong> {new Date(order.createdAt).toLocaleDateString()}</p>
-      {#if order.status === 'rented'}
-        <p><strong>Rental Date:</strong> {new Date(order.rentalDate).toLocaleDateString()}</p>
-        <p><strong>Due Date:</strong> {new Date(order.returnDate).toLocaleDateString()}</p>
-        <p><strong>Days Left:</strong> {getDaysUntilDue(order.returnDate)} days</p>
-      {/if}
-      <p><strong>Total:</strong> {euro.format(order.total / 100)}</p>
+      <p><strong>Order Date:</strong> {order.date}</p>
+      <p><strong>Total:</strong> {order.total}</p>
     </div>
   </div>
 
@@ -55,14 +37,14 @@
         <tbody>
           {#each order.items as item}
             <tr>
-              <td>{item.title}</td>
+              <td>{item.bookTitle}</td>
               <td>
-                <span class="badge bg-{item.type === 'rent' ? 'info' : 'primary'}">
-                  {item.type === 'rent' ? 'Rental' : 'Purchase'}
+                <span class="badge bg-{item.type === 'Rental' ? 'info' : 'primary'}">
+                  {item.type}
                 </span>
               </td>
               <td>{item.quantity}</td>
-              <td>{euro.format(item.unitPrice * item.quantity / 100)}</td>
+              <td>{item.price}</td>
             </tr>
           {/each}
         </tbody>
@@ -70,6 +52,6 @@
     </div>
   </div>
 
-  <a href="/member" class="btn btn-primary">Go to My Orders</a>
+  <a href="/member/orders" class="btn btn-primary">Go to My Orders</a>
   <a href="/catalogue" class="btn btn-secondary">Continue Shopping</a>
 </div>
