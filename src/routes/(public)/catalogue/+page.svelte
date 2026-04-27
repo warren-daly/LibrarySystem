@@ -127,14 +127,12 @@
 								Available ({b.stock})
 							</span>
 
-							<a
-								href={`/member/rentals?bookId=${b.id}`}
-								class="btn btn-primary w-100 mt-2"
-								role="button"
-								aria-label={`Rent ${b.title}`}
-							>
-								Rent Book
-							</a>
+							<form method="post" action="?/startRental" use:enhance>
+								<input type="hidden" name="bookId" value={b.id} />
+								<button type="submit" class="btn btn-primary w-100 mt-2">
+									<i class="bi bi-book me-2"></i> Rent Book
+								</button>
+							</form>
 						{/if}
 
 						<form

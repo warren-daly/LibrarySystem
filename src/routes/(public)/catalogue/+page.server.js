@@ -60,5 +60,12 @@ export const actions = {
 			.where(eq(book.id, bookId));
 
 		return { success: true };
+	},
+
+	startRental: async ({ locals, request }) => {
+		if (!locals.user) throw error(401, 'Not authenticated');
+		const data = await request.formData();
+		const bookId = Number(data.get('bookId'));
+		throw redirect(303, `/member/rentals?bookId=${bookId}`);
 	}
 };

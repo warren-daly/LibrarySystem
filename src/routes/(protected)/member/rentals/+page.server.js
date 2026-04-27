@@ -43,6 +43,13 @@ export async function load({ url, locals }) {
 }
 
 export const actions = {
+	startRental: async ({ locals, request }) => {
+		if (!locals.user) throw error(401, 'Not authenticated');
+		const data = await request.formData();
+		const bookId = Number(data.get('bookId'));
+		throw redirect(303, `/member/rentals?bookId=${bookId}`);
+	},
+
 	createRental: async ({ request, locals }) => {
 		try {
 			if (!locals.user) {
