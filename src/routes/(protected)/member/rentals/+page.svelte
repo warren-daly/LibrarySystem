@@ -1,4 +1,5 @@
 <script>
+	import { page } from '$app/stores';
 	import RentalForm from '$lib/components/RentalForm.svelte';
 
 	let { data } = $props();
@@ -9,7 +10,13 @@
 	let currentUser = $derived(data.currentUser ?? null);
 
 	let showForm = $state(data.selectedBookId ? true : false);
+	let filterStatus = $derived($page.url.searchParams.get('status'));
 
+	let filteredRentals = $derived.by(() => {
+		if (!filterStatus) return rentals;
+		return rentals.filter(r => r.status === filterStatus);
+	});
+	
 	function hideForm() {
 		showForm = false;
 	}
@@ -35,6 +42,13 @@
 			</div>
 		{/if}
 
+		<div class="filter-buttons mb-4 d-flex gap-2 justify-content-center">
+			<a href="/member/rentals" class="btn btn-sm btn-outline-secondary">All</a>
+			<a href="/member/rentals?status=rented" class="btn btn-sm btn-outline-primary">Active</a>
+			<a href="/member/rentals?status=returned" class="btn btn-sm btn-outline-success">Returned</a>
+			<a href="/member/rentals?status=late" class="btn btn-sm btn-outline-danger">Late</a>
+		</div>
+
 		<div class="card shadow-sm">
 			<div class="card-body p-0">
 				<div class="table-responsive">
@@ -50,7 +64,7 @@
 							</tr>
 						</thead>
 						<tbody>
-							{#each rentals as r (r.id)}
+							{#each filteredRentals as r (r.id)}
 								<tr>
 									<td class="ps-4">{r.id}</td>
 									<td>{r.book?.title ?? `Book #${r.bookId}`}</td>
@@ -70,7 +84,7 @@
 									<td>{new Date(r.rentalDate).toLocaleDateString('en-IE')}</td>
 									<td>{new Date(r.returnDate).toLocaleDateString('en-IE')}</td>
 									<td class="pe-4 text-center">
-										<div class="d-flex gap-2 justify-content-center">
+										<div class="d-flex gap-2 justify-content-center flex-wrap">
 											{#if r.status === 'rented'}
 												<form method="POST" action="?/returnRental">
 													<input type="hidden" name="rentalId" value={r.id} />
@@ -126,7 +140,7 @@
 								</tr>
 							{/each}
 
-							{#if rentals.length === 0}
+							{#if filteredRentals.length === 0}
 								<tr>
 									<td colspan="6" class="text-center py-5 text-muted">
 										<i class="bi bi-inbox fs-1 d-block mb-2"></i>
@@ -179,5 +193,15 @@
 		display: flex;
 		align-items: center;
 		gap: 0.25rem;
+	}
+
+	.filter-buttons a {
+		text-decoration: none;
+		border-radius: 6px;
+		transition: all 0.2s;
+	}
+
+	.filter-buttons a:hover {
+		transform: translateY(-1px);
 	}
 </style>
