@@ -2,7 +2,7 @@ import { db } from '$lib/server/db';
 import { book, review } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { cartService } from '$lib/server/services/cart-service.js';
-import { redirect, error } from '@sveltejs/kit';
+import { redirect, error, fail } from '@sveltejs/kit';
 
 export async function load() {
 	const books = await db.select().from(book);
@@ -13,9 +13,10 @@ export async function load() {
 				where: eq(review.bookId, b.id)
 			});
 
-			const averageRating = reviews.length > 0
-				? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
-				: null;
+			const averageRating =
+				reviews.length > 0
+					? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
+					: null;
 
 			return {
 				...b,
@@ -25,30 +26,38 @@ export async function load() {
 		})
 	);
 
-	return {
-		books: booksWithRatings
-	};
+	return { books: booksWithRatings };
 }
 
 export const actions = {
 	addToCart: async ({ locals, request }) => {
 		if (!locals.user) {
-			throw redirect(303, '/auth/login');
+			throw redirect(303, '/auth/login?redirectTo=/catalogue');
 		}
 
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
 		const type = data.get('type');
 
-		console.log('SERVER RECEIVED:', { bookId, type });
-		console.log('All form data:', Object.fromEntries(data));
-
 		if (!bookId) throw error(400, 'Invalid book');
-		if (!type || !['rent', 'buy'].includes(type)) {
-			throw error(400, 'Invalid type');
+		if (!type || type !== 'buy') throw error(400, 'Invalid type');
+
+		const selectedBook = await db.query.book.findFirst({
+			where: eq(book.id, bookId)
+		});
+
+		if (!selectedBook || selectedBook.stock <= 0) {
+			return fail(400, {
+				errors: { general: 'This book is out of stock.' }
+			});
 		}
 
 		await cartService.addItem(locals.user.id, bookId, 1, type);
+
+		await db
+			.update(book)
+			.set({ stock: selectedBook.stock - 1 })
+			.where(eq(book.id, bookId));
 
 		return { success: true };
 	}
