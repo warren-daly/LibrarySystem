@@ -1,7 +1,7 @@
 import { rentalService } from '$lib/server/services/rental-service.js';
 import { bookService } from '$lib/server/services/books-service.js';
 import { db } from '$lib/server/db';
-import { review } from '$lib/server/db/schema';
+import { review, book } from '$lib/server/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { eq, and } from 'drizzle-orm';
 import { ZodError } from 'zod';
@@ -16,14 +16,10 @@ export async function load({ url, locals }) {
 			? rentals.filter((r) => Number(r.userId) === Number(locals.user.id))
 			: [];
 
-		// Check for existing reviews for each rental
 		const rentalsWithReviewStatus = await Promise.all(
 			memberRentals.map(async (r) => {
 				const existingReview = await db.query.review.findFirst({
-					where: and(
-						eq(review.bookId, r.bookId),
-						eq(review.userId, locals.user.id)
-					)
+					where: and(eq(review.bookId, r.bookId), eq(review.userId, locals.user.id))
 				});
 
 				return {
@@ -71,6 +67,45 @@ export const actions = {
 				});
 			}
 
+			const allRentals = await rentalService.getAllrentals();
+
+			const hasLateRental = allRentals.some(
+				(r) => Number(r.userId) === Number(locals.user.id) && r.status === 'late'
+			);
+
+			if (hasLateRental) {
+				return fail(400, {
+					errors: {
+						general: 'You have late rental fees to pay before renting another book.'
+					}
+				});
+			}
+
+			const alreadyRentedThisBook = allRentals.some(
+				(r) =>
+					Number(r.userId) === Number(locals.user.id) &&
+					Number(r.bookId) === Number(bookId) &&
+					(r.status === 'rented' || r.status === 'late')
+			);
+
+			if (alreadyRentedThisBook) {
+				return fail(400, {
+					errors: {
+						general: 'You already have an active rental of this book.'
+					}
+				});
+			}
+
+			const selectedBook = await db.query.book.findFirst({
+				where: eq(book.id, bookId)
+			});
+
+			if (!selectedBook || selectedBook.stock <= 0) {
+				return fail(400, {
+					errors: { general: 'This book is out of stock.' }
+				});
+			}
+
 			const rentalData = {
 				userId: Number(locals.user.id),
 				bookId,
@@ -79,6 +114,12 @@ export const actions = {
 			};
 
 			await rentalService.createRental(rentalData);
+
+			await db
+				.update(book)
+				.set({ stock: selectedBook.stock - 1 })
+				.where(eq(book.id, bookId));
+
 			return { success: true };
 		} catch (err) {
 			console.error('Error creating rental:', err);
@@ -87,9 +128,7 @@ export const actions = {
 				const errors = {};
 				err.issues.forEach((issue) => {
 					const field = issue.path[0]?.toString();
-					if (field) {
-						errors[field] = issue.message;
-					}
+					if (field) errors[field] = issue.message;
 				});
 				return fail(400, { errors });
 			}
@@ -143,6 +182,17 @@ export const actions = {
 				status: 'returned'
 			});
 
+			const returnedBook = await db.query.book.findFirst({
+				where: eq(book.id, existingRental.bookId)
+			});
+
+			if (returnedBook) {
+				await db
+					.update(book)
+					.set({ stock: returnedBook.stock + 1 })
+					.where(eq(book.id, existingRental.bookId));
+			}
+
 			return { success: true };
 		} catch (err) {
 			if (err?.status === 303) {
@@ -155,9 +205,7 @@ export const actions = {
 				const errors = {};
 				err.issues.forEach((issue) => {
 					const field = issue.path[0]?.toString();
-					if (field) {
-						errors[field] = issue.message;
-					}
+					if (field) errors[field] = issue.message;
 				});
 				return fail(400, { errors });
 			}
@@ -184,19 +232,14 @@ export const actions = {
 				return fail(400, { error: 'Rating must be between 1 and 5' });
 			}
 
-			// Check if user already reviewed this book
 			const existingReview = await db.query.review.findFirst({
-				where: and(
-					eq(review.bookId, bookId),
-					eq(review.userId, userId)
-				)
+				where: and(eq(review.bookId, bookId), eq(review.userId, userId))
 			});
 
 			if (existingReview) {
 				return fail(400, { error: 'You have already reviewed this book' });
 			}
 
-			// Create new review
 			await db.insert(review).values({
 				bookId,
 				userId,

@@ -1,5 +1,5 @@
 import { bookService } from '$lib/server/services/books-service.js';
-import { error, fail } from '@sveltejs/kit';
+import { fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
 import fs from 'fs';
 import path from 'path';
@@ -23,6 +23,17 @@ export const actions = {
   createBook: async ({ request }) => {
     try {
       const formData = await request.formData();
+      const title = (formData.get('title') ?? '').trim();
+      const author = (formData.get('author') ?? '').trim();
+      const allBooks = await bookService.getAllBooks();
+
+      const duplicate = allBooks.some(
+        (b) => b.title.toLowerCase() === title.toLowerCase() &&
+               b.author.toLowerCase() === author.toLowerCase()
+      );
+      if (duplicate) {
+        return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
+      }
       const file = formData.get('image');
       let filename = '';
       if (file && file.size > 0) {
@@ -68,12 +79,23 @@ export const actions = {
     try {
       const formData = await request.formData();
       const id = Number(formData.get('id'));
+      const title = (formData.get('title') ?? '').trim();
+      const author = (formData.get('author') ?? '').trim();
     
       const existingBook = await bookService.getBookById(id);
       if (!existingBook) {
         return fail(404, {
           errors: { general: 'Book not found' }
         });
+      }
+      const allBooks = await bookService.getAllBooks();
+      const duplicate = allBooks.some(
+        (b) => b.id !== id &&
+               b.title.toLowerCase() === title.toLowerCase() &&
+               b.author.toLowerCase() === author.toLowerCase()
+      );
+      if (duplicate) {
+        return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
       }
 
 

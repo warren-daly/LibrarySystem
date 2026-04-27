@@ -114,7 +114,7 @@
 					aria-invalid={errors.rentalDays ? 'true' : 'false'}
 				>
 					<option value="">Select days</option>
-					{#each Array(14) as _, i}
+					{#each Array(14) as i (i)}
 						<option value={String(i + 1)}>{i + 1} day{i === 0 ? '' : 's'}</option>
 					{/each}
 				</select>
