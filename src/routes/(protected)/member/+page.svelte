@@ -48,7 +48,7 @@
 					<h2 class="my-3">{data.totalRentals}</h2>
 
 					<div class="mt-auto">
-						<a href="/member/rentals" class="btn btn-primary" aria-label="View my rentals">
+						<a href="/member/rentals?status=rented" class="btn btn-primary" aria-label="View my rentals">
 							<i class="bi bi-receipt me-1" aria-hidden="true"></i>
 							My Rentals
 						</a>
@@ -71,7 +71,7 @@
 					<h2 class="my-3">{data.activeRentals}</h2>
 
 					<div class="mt-auto">
-						<a href="/member/rentals" class="btn btn-primary" aria-label="View active rentals">
+						<a href="/member/rentals?status=returned" class="btn btn-primary" aria-label="View active rentals">
 							<i class="bi bi-journal-check me-1" aria-hidden="true"></i>
 							View Active
 						</a>
@@ -94,7 +94,7 @@
 					<h2 class="my-3">{data.lateRentals}</h2>
 
 					<div class="mt-auto">
-						<a href="/member/rentals" class="btn btn-primary" aria-label="View late rentals">
+						<a href="/member/rentals?status=late" class="btn btn-primary" aria-label="View late rentals">
 							<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
 							View Late
 						</a>
