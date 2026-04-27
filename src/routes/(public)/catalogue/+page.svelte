@@ -96,6 +96,7 @@
 						<p class="card-text">
 							<strong>Author:</strong> {b.author}
 						</p>
+						<p class="card-text"><strong>Genre:</strong> {b.genre}</p>
 
 						<p class="card-text">
 							<strong>Price:</strong>
