@@ -48,7 +48,7 @@
 {:else}
 	<li class="nav-item dropdown">
 		<button class="btn btn-outline-light" type="button">
-			Login
+			<a class="nav-link" href="/auth/login">Login</a>
 		</button>
 
 		<div class="dropdown-content p-3">
@@ -139,5 +139,10 @@
 	font-weight: 600;
 }
 
-
+.nav-link{
+	color: white;
+	padding: 0;
+	margin: 0;
+	text-decoration: none;
+}
 </style>

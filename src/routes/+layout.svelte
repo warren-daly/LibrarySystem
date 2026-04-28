@@ -1,7 +1,7 @@
 <script>
 	import 'bootstrap/dist/css/bootstrap.min.css';
 	import 'bootstrap-icons/font/bootstrap-icons.min.css';
-	
+	import Footer from '$lib/components/Footer.svelte';
 	import GuestMenu from '$lib/components/nav/GuestMenu.svelte';
 	import MemberMenu from '$lib/components/nav/MemberMenu.svelte';
 	import AdminMenu from '$lib/components/nav/AdminMenu.svelte';
@@ -67,14 +67,29 @@
 	</nav>
 </header>
 
-<main class="app-main">
-	{@render children()}
-</main>
+<div class="page-wrapper">
+	<main class="main-content app-main">
+		{@render children()}
+	</main>
+
+	<Footer />
+</div>
 
 <style>
-  .app-main {
-    padding-top: 50px; 
-  }
+	.page-wrapper {
+		min-height: 100vh;
+		display: flex;
+		flex-direction: column;
+	}
+
+	.main-content {
+		flex: 1;
+	}
+
+	.app-main {
+		padding-top: 80px;
+		padding-bottom: 30px;
+	}
 
   :global(.navbar-toggler) {
     opacity: 0.8;

@@ -44,7 +44,8 @@
                 console.error('Registration email failed:', err);
             }
 
-            window.location.href = '/';
+            const membershipNumber = `M${Math.floor(1000 + Math.random() * 9000)}`;
+            window.location.href = `/auth/register/register-success?member=${membershipNumber}`;
         }
     }    
 </script>
@@ -77,10 +78,10 @@
         	{/if}
 
             <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-box-arrow-in-right me-1"></i> Submit
-            </button>
-            <button type="reset" class="btn w-100">
-                <i class="bi bi-box-arrow-in-right me-1"></i> Reset
+                <i class="submit"></i> Submit
+            </button><br>
+            <button type="reset" class="btn btn-danger w-100">
+                <i class="reset"></i> Reset
             </button><br><br><br>
         </form>
     </div>
@@ -108,7 +109,7 @@
 		padding: 20px;
 		border: 1px solid #ccc;
 		border-radius: 8px;
-		width: 300px;
+		width: 600px;
 		background-color: #f9f9f9;
 	}
 

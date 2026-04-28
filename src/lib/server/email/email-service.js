@@ -28,10 +28,23 @@ export async function sendPasswordResetEmail({ to, url }) {
 export async function sendRegistrationConfirmationEmail({ to, name }) {
 	await sendEmail({
 		to,
-		subject: 'Welcome to the Library System',
+		subject: 'Welcome to the Online Library',
 		html: `
-			<h2>Welcome${name ? `, ${name}` : ''}</h2>
-			<p>Your account has been created successfully.</p>
+			<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+				<h2>Welcome to the Library System${name ? `, ${name}` : ''}</h2>
+
+				<p>Your account has been created successfully.</p>
+
+				<p>You can now log in, browse available books, rent books, and manage your account.</p>
+
+				<p>If you did not create this account, you can ignore this email.</p>
+
+				<hr />
+
+				<p style="font-size: 12px; color: #666;">
+					This is an automated email from the Online Library.
+				</p>
+			</div>
 		`
 	});
 }
