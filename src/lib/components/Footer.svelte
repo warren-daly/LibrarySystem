@@ -12,9 +12,10 @@
 <style>
 	.footer {
 		margin-top: 40px;
-		padding: 15px;
-		background-color: #f1f5f9;
-		border-top: 1px solid #ccc;
+		padding: 18px 20px;
+		background-color: #212529; /* matches navbar */
+		color: #ddd;
+		border-top: 1px solid #444;
 	}
 
 	.footer-content {
@@ -26,9 +27,14 @@
 		font-size: 14px;
 	}
 
-	.links a {
+	.footer-links a {
 		margin-left: 15px;
 		text-decoration: none;
-		color: #2563eb;
+		color: #9ec5fe;
+		transition: color 0.2s ease;
+	}
+
+	.footer-links a:hover {
+		color: #ffffff;
 	}
 </style>

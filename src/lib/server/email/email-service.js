@@ -6,7 +6,7 @@ export const resend_email = (env.RESEND_EMAIL)
 
 export async function sendEmail({ to, subject, html }) {
 	await resend.emails.send({
-		from: 'Library System <onboarding@resend.dev>',
+		from: 'Online Library <onboarding@resend.dev>',
 		to,
 		subject,
 		html
@@ -16,13 +16,38 @@ export async function sendEmail({ to, subject, html }) {
 export async function sendPasswordResetEmail({ to, url }) {
 	await sendEmail({
 		to,
-		subject: 'Reset your password',
+		subject: 'Password Reset Request',
 		html: `
-			<h2>Password Reset</h2>
-			<p>You requested a password reset.</p>
-			<p><a href="${url}">Click here to reset your password</a></p>
+			<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+				<h2>Password Reset Request</h2>
+				<p>We received a request to reset your password for your Online Library account.</p>
+				<p>
+					Click the button below to reset your password:
+				</p>
+				<p style="text-align: center; margin: 20px 0;">
+					<a 
+						href="${url}" 
+						style="
+							background-color: #0d6efd;
+							color: white;
+							padding: 10px 16px;
+							text-decoration: none;
+							border-radius: 6px;
+							display: inline-block;
+						"
+					>
+						Reset Password
+					</a>
+				</p>
+				<p>If you did not request a password reset, you can safely ignore this email.</p>
+				<hr />
+				<p style="font-size: 12px; color: #666;">
+					This is an automated email from the Online Library.
+				</p>
+			</div>
 		`
 	});
+	console.log('Password reset email sent to', to);
 }
 
 export async function sendRegistrationConfirmationEmail({ to, name }) {
@@ -32,15 +57,10 @@ export async function sendRegistrationConfirmationEmail({ to, name }) {
 		html: `
 			<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
 				<h2>Welcome to the Library System${name ? `, ${name}` : ''}</h2>
-
 				<p>Your account has been created successfully.</p>
-
 				<p>You can now log in, browse available books, rent books, and manage your account.</p>
-
 				<p>If you did not create this account, you can ignore this email.</p>
-
 				<hr />
-
 				<p style="font-size: 12px; color: #666;">
 					This is an automated email from the Online Library.
 				</p>
@@ -54,22 +74,32 @@ export async function sendPaymentConfirmationEmail({ to, amount }) {
 		to,
 		subject: 'Payment Confirmation',
 		html: `
-			<h2>Payment Received</h2>
-			<p>Your payment of €${amount} was successful.</p>
+			<h2>Payment Successful</h2>
+			<p>Your payment has been received successfully.</p>
+			<p><strong>Amount paid:</strong> €${(amount / 100).toFixed(2)}</p>
+			<p>Thank you for keeping your Online Library account up to date.</p>
+			<hr>
+			<p style="font-size: 12px; color: #666;">This is an automated email from the Online Library.</p>
 		`
 	});
+	console.log('Payment confirmation email sent to', to);
 }
 
 export async function sendRentalConfirmationEmail({ to, bookTitle, returnDate }) {
 	await sendEmail({
 		to,
-		subject: 'Rental Confirmation',
+		subject: 'Book Rental Confirmation',
 		html: `
-			<h2>Book Rental Confirmed</h2>
-			<p>You have successfully rented <strong>${bookTitle}</strong>.</p>
-			<p>Return date: ${new Date(returnDate).toLocaleDateString()}</p>
+			<h2>Rental Confirmed</h2>
+			<p>Your rental has been successfully created.</p>
+			<p><strong>Book:</strong> ${bookTitle}</p>
+			<p><strong>Return date:</strong> ${new Date(returnDate).toLocaleDateString()}</p>
+			<p>Please return the book by the date above to avoid late fees.</p>
+			<hr>
+			<p style="font-size: 12px; color: #666;">This is an automated email from the Online Library.</p>
 		`
 	});
+	console.log('Rental confirmation email sent to', to);
 }
 
 export async function sendReturnConfirmationEmail({ to, bookTitle }) {
@@ -77,10 +107,15 @@ export async function sendReturnConfirmationEmail({ to, bookTitle }) {
 		to,
 		subject: 'Book Return Confirmation',
 		html: `
-			<h2>Book Returned</h2>
-			<p>Your return for <strong>${bookTitle}</strong> has been processed.</p>
+			<h2>Return Confirmed</h2>
+			<p>Your book return has been processed successfully.</p>
+			<p><strong>Book:</strong> ${bookTitle}</p>
+			<p>Thank you for using the Online Library.</p>
+			<hr>
+			<p style="font-size: 12px; color: #666;">This is an automated email from the Online Library.</p>
 		`
 	});
+	console.log('Return confirmation email sent to', to);
 }
 
 export async function sendLateReturnEmail({ to, bookTitle, returnDate }) {
@@ -89,11 +124,15 @@ export async function sendLateReturnEmail({ to, bookTitle, returnDate }) {
 		subject: 'Late Return Notice',
 		html: `
 			<h2>Late Return Notice</h2>
-			<p>Your rental for <strong>${bookTitle}</strong> is overdue.</p>
-			<p>The due date was: ${new Date(returnDate).toLocaleDateString()}</p>
-			<p>A late fee will now apply before the return can be completed.</p>
+			<p>Your rental is overdue.</p>
+			<p><strong>Book:</strong> ${bookTitle}</p>
+			<p><strong>Due date:</strong> ${new Date(returnDate).toLocaleDateString()}</p>
+			<p>A late fee now applies. Please complete the late fee payment to finalise the return.</p>
+			<hr>
+			<p style="font-size: 12px; color: #666;">This is an automated email from the Online Library.</p>
 		`
 	});
+	console.log('Late return email sent to', to);
 }
 
 export async function sendContactEmail({ name, email, message, to }) {

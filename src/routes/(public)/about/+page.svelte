@@ -2,7 +2,7 @@
 
 <div class="about-container">
 
-    <section class="container">
+    <section class="about-card">
         <p>
             This website is an online library system designed to make it easy for 
             users to browse, rent, and return books.
@@ -14,7 +14,7 @@
         </p>
     </section>
 
-    <section class="container">
+    <section class="about-card">
 		<h2>What we offer</h2>
 		<ul>
 			<li>A user-friendly system for browsing available books</li>
@@ -24,7 +24,7 @@
 		</ul>
 	</section>
 
-	<section class="container">
+	<section class="about-card">
 		<h2>Our Aim</h2>
 		<p>
 			We aim to create a smooth and reliable experience for users by combining 
@@ -39,7 +39,6 @@
 </div>
 
 <style>
-
 	.heading1 {
 		text-align: center;
 		margin-top: 30px;
@@ -51,7 +50,7 @@
 		padding: 20px;
 	}
 
-	.container {
+	.about-card {
 		background-color: #f9f9f9;
 		padding: 20px;
 		margin-bottom: 20px;
@@ -71,4 +70,8 @@
 		margin-bottom: 5px;
 	}
 
+	p {
+	color: #555;
+	line-height: 1.6;
+	}
 </style>

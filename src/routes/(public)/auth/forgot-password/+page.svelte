@@ -29,54 +29,44 @@
     }
 </script>
 
-<h1 class="heading1">Forgot Password</h1>
+<div class="container d-flex justify-content-center align-items-start py-5">
+	<div class="card shadow-sm w-100" style="max-width: 480px;">
+		<div class="card-body p-4">
+			<h1 class="h3 text-center mb-2">Forgot Password</h1>
+			<p class="text-muted text-center mb-4">
+				Enter your email address and we’ll send you a password reset link if an account exists.
+			</p>
 
-    <div class="forms-container">
-        <form class="form1" onsubmit={handleForgotPassword}>
-            <label for="email">Enter Your Email:</label><br>
-            <input type="email" id="email" name="email" bind:value={email} required><br><br>
+			<form onsubmit={handleForgotPassword}>
+				<div class="mb-3">
+					<label for="email" class="form-label fw-semibold">Email</label>
+					<input
+						type="email"
+						id="email"
+						class="form-control"
+						bind:value={email}
+						required
+					/>
+				</div>
 
-			{#if successMessage}
-                <p style="color:green;">{successMessage}</p>
-            {/if}
+				{#if errorMessage}
+					<div class="alert alert-danger py-2">{errorMessage}</div>
+				{/if}
 
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="bi bi-box-arrow-in-right me-1"></i> Submit
-            </button>
-        </form>
-    </div>
+				{#if successMessage}
+					<div class="alert alert-success py-2">{successMessage}</div>
+				{/if}
 
-<style>
+				<button type="submit" class="btn btn-primary w-100">
+					Send Reset Link
+				</button>
+			</form>
 
-	.heading1 {
-		text-align: center;
-		margin-top: 30px;
-	}
-
-	.heading2 {
-		text-align: center;
-		margin-bottom: 20px;
-		color: #555;
-	}
-
-	.forms-container {
-		display: flex;
-		justify-content: center;
-		margin-top: 20px;
-	}
-
-	.form1 {
-		padding: 20px;
-		border: 1px solid #ccc;
-		border-radius: 8px;
-		width: 300px;
-		background-color: #f9f9f9;
-	}
-
-	input {
-		width: 100%;
-		padding: 6px;
-	}
-
-</style>
+			<p class="text-center text-muted mt-3 mb-0">
+				Remembered your password?
+				<a href="/auth/login">Back to login</a>
+			</p>
+		</div>
+	</div>
+</div>
 

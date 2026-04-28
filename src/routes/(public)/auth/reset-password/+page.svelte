@@ -45,77 +45,56 @@
 	}
 </script>
 
-<h1 class="heading1">Reset Password</h1>
+<div class="container d-flex justify-content-center align-items-start py-5">
+	<div class="card shadow-sm w-100" style="max-width: 480px;">
+		<div class="card-body p-4">
+			<h1 class="h3 text-center mb-2">Reset Password</h1>
+			<p class="text-muted text-center mb-4">
+				Enter and confirm your new password below.
+			</p>
 
-<div>
-	<h4 class="heading2">Please enter your new password below.</h4>
+			<form onsubmit={handleResetPassword}>
+				<div class="mb-3">
+					<label for="pwd" class="form-label fw-semibold">New password</label>
+					<input
+						type="password"
+						id="pwd"
+						class="form-control"
+						bind:value={newPassword}
+						required
+						minlength="8"
+					/>
+					<div class="form-text">Password must be at least 8 characters long.</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="confirmPwd" class="form-label fw-semibold">Confirm new password</label>
+					<input
+						type="password"
+						id="confirmPwd"
+						class="form-control"
+						bind:value={confirmNewPassword}
+						required
+						minlength="8"
+					/>
+				</div>
+
+				{#if errorMessage}
+					<div class="alert alert-danger py-2">{errorMessage}</div>
+				{/if}
+
+				{#if successMessage}
+					<div class="alert alert-success py-2">{successMessage}</div>
+				{/if}
+
+				<button type="submit" class="btn btn-primary w-100">
+					Reset Password
+				</button>
+			</form>
+
+			<p class="text-center mt-3 mb-0">
+				<a href="/auth/login">Back to login</a>
+			</p>
+		</div>
+	</div>
 </div>
-
-<div class="forms-container">
-	<form class="form1" onsubmit={handleResetPassword}>
-		<label for="pwd">New password:</label><br>
-		<input
-			type="password"
-			id="pwd"
-			name="pwd"
-			bind:value={newPassword}
-			required
-			minlength="8"
-		>
-		<small class="password-hint">Password must be at least 8 characters long.</small><br><br>
-
-		<label for="confirmPwd">Confirm new password:</label><br>
-		<input
-			type="password"
-			id="confirmPwd"
-			name="confirmPwd"
-			bind:value={confirmNewPassword}
-			required
-			minlength="8"
-		><br><br>
-
-		{#if errorMessage}
-			<p style="color:red;">{errorMessage}</p>
-		{/if}
-
-		{#if successMessage}
-			<p style="color:green;">{successMessage}</p>
-		{/if}
-
-		<button type="submit" class="btn btn-primary w-100">
-			<i class="bi bi-box-arrow-in-right me-1"></i> Submit
-		</button><br><br><br>
-	</form>
-</div>
-
-<style>
-	.heading1 {
-		text-align: center;
-		margin-top: 30px;
-	}
-
-	.heading2 {
-		text-align: center;
-		margin-bottom: 20px;
-		color: #555;
-	}
-
-	.forms-container {
-		display: flex;
-		justify-content: center;
-		margin-top: 20px;
-	}
-
-	.form1 {
-		padding: 20px;
-		border: 1px solid #ccc;
-		border-radius: 8px;
-		width: 300px;
-		background-color: #f9f9f9;
-	}
-
-	input {
-		width: 100%;
-		padding: 6px;
-	}
-</style>
