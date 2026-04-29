@@ -44,8 +44,8 @@
 
 		<div class="filter-buttons mb-4 d-flex gap-2 justify-content-center">
 			<a href="/member/rentals" class="btn btn-sm btn-outline-secondary">All</a>
-			<a href="/member/rentals?status=rented" class="btn btn-sm btn-outline-primary">Active</a>
-			<a href="/member/rentals?status=returned" class="btn btn-sm btn-outline-success">Returned</a>
+			<a href="/member/rentals?status=rented" class="btn btn-sm btn-outline-success">Active</a>
+			<a href="/member/rentals?status=returned" class="btn btn-sm btn-outline-primary">Returned</a>
 			<a href="/member/rentals?status=late" class="btn btn-sm btn-outline-danger">Late</a>
 		</div>
 

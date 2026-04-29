@@ -57,7 +57,7 @@
 					<h5 class="card-title">Rentals</h5>
 					<p class="card-text">Check and manage current rental records.</p>
 
-					<h2 class="my-3">{data.totalRentals ?? 0}</h2>
+					<h2 class="my-3">{data.rentedCount ?? 0}</h2>
 
 					<div class="mt-auto">
 						<a href="/admin/rentals" class="btn btn-primary" aria-label="Manage rentals">
