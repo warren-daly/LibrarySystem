@@ -12,7 +12,7 @@
 	</div>
 
 	<div class="row g-4 mb-4">
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<div class="card h-100 shadow-sm text-center" role="region" aria-label="Books overview">
 				<div class="card-body d-flex flex-column">
 					<i class="bi bi-book fs-1 text-primary mb-2" aria-hidden="true"></i>
@@ -31,7 +31,7 @@
 			</div>
 		</div>
 
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<div class="card h-100 shadow-sm text-center" role="region" aria-label="Members overview">
 				<div class="card-body d-flex flex-column">
 					<i class="bi bi-people fs-1 text-success mb-2" aria-hidden="true"></i>
@@ -50,7 +50,7 @@
 			</div>
 		</div>
 
-		<div class="col-md-4">
+		<div class="col-md-3">
 			<div class="card h-100 shadow-sm text-center" role="region" aria-label="Rentals overview">
 				<div class="card-body d-flex flex-column">
 					<i class="bi bi-receipt fs-1 text-warning mb-2" aria-hidden="true"></i>
@@ -68,7 +68,26 @@
 				</div>
 			</div>
 		</div>
-	</div>
+
+		<div class="col-md-3">
+				<div class="card h-100 shadow-sm text-center" role="region" aria-label="Members overview">
+					<div class="card-body d-flex flex-column">
+						<i class="bi bi-file-earmark-text fs-1 text-success mb-2" aria-hidden="true"></i>
+						<h5 class="card-title">Reports</h5>
+						<p class="card-text">View and manage reports and statistics.</p>
+
+						<h2 class="my-3"></h2>
+
+						<div class="mt-auto">
+							<a href="/admin/reports" class="btn btn-primary" aria-label="View reports">
+								<i class="bi bi-people me-1" aria-hidden="true"></i>
+								View Reports
+							</a>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
 
 	<div class="card shadow-sm" role="region" aria-labelledby="recent-users-title">
 		<div class="card-body">
