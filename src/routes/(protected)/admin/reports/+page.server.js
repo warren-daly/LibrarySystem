@@ -1,8 +1,8 @@
 import { bookService } from '$lib/server/services/books-service.js';
 import { usersDataAccess } from '$lib/server/data-access/users-data-access.js';
 import { db } from '$lib/server/db';
-import { rental, order } from '$lib/server/db/schema';
-import { eq, and, gte } from 'drizzle-orm';
+import { rental, order, review } from '$lib/server/db/schema';
+import { eq, and, gte, desc } from 'drizzle-orm';
 
 export const load = async ({ locals }) => {
 	const books = await bookService.getAllBooks();
@@ -15,12 +15,17 @@ export const load = async ({ locals }) => {
 		}
 	});
 
+	const allReviews = await db.query.review.findMany();
+
 	const rentedRentals = allRentals.filter(r => r.status === 'rented');
-	const lateRentals = allRentals.filter(r => r.status === 'late');
+	const lateRentals = allRentals.filter(r => r.lateReturned == 1);
 	const returnedRentals = allRentals.filter(r => r.status === 'returned');
 
 	const allOrders = await db.query.order.findMany({
-		where: eq(order.status, 'completed')
+		where: eq(order.status, 'completed'),
+		with: {
+			user: true
+		}
 	});
 
 	const totalOrderRevenue = allOrders.reduce((sum, o) => sum + o.total, 0);
@@ -38,6 +43,31 @@ export const load = async ({ locals }) => {
 
 	const currentMonthRevenue = monthlyRevenue.reduce((sum, o) => sum + o.total, 0);
 
+	const recentOrders = await db.query.order.findMany({
+		where: eq(order.status, 'completed'),
+		with: {
+			user: true
+		},
+		limit: 10,
+		orderBy: [desc(order.createdAt)]
+	});
+
+	const topBooks = books
+		.map(book => {
+			const rentals = allRentals.filter(r => r.bookId === book.id);
+			const reviews = allReviews?.filter(r => r.bookId === book.id) || [];
+			const avgRating = reviews.length > 0 
+				? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length 
+				: 0;
+			return {
+				...book,
+				rentalCount: rentals.length,
+				averageRating: avgRating
+			};
+		})
+		.sort((a, b) => b.rentalCount - a.rentalCount)
+		.slice(0, 6);
+
 	return {
 		user: locals.user,
 		totalUsers: users?.length ?? 0,
@@ -49,6 +79,8 @@ export const load = async ({ locals }) => {
 		totalRevenue,
 		currentMonthRevenue,
 		totalOrders: allOrders?.length ?? 0,
-		recentMembers: users?.slice(0, 5) ?? []
+		recentMembers: users?.slice(0, 5) ?? [],
+		recentOrders,
+		topBooks
 	};
 };
