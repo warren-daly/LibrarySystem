@@ -4,6 +4,7 @@ import { readFileSync } from 'fs';
 import { eq } from 'drizzle-orm';
 import * as schema from './schema.js';
 import * as authSchema from './auth.schema.js';
+import { books } from './seed-books-data.js';
 
 const env = Object.fromEntries(
 	readFileSync('.env', 'utf-8')
@@ -18,83 +19,62 @@ const env = Object.fromEntries(
 const client = createClient({ url: env.DATABASE_URL });
 const db = drizzle(client, { schema: { ...schema, ...authSchema } });
 
+async function seedBooks() {
+	for (const bookData of books) {
+		const existingBook = await db.query.book.findFirst({
+			where: eq(schema.book.title, bookData.title)
+		});
+
+		if (!existingBook) {
+			await db.insert(schema.book).values(bookData);
+			console.log(`Book Added: ${bookData.title}`);
+		} else {
+			console.log(`Book Skipped: ${bookData.title}`);
+		}
+	}
+
+	console.log('Book seeding complete');
+}
+
 async function seed() {
-	const response = await fetch(`${env.ORIGIN}/api/auth/sign-up/email`, {
-		method: 'POST',
-		headers: {
-			'Content-Type': 'application/json',
-			Origin: env.ORIGIN
-		},
-		body: JSON.stringify({
-			name: 'Admin',
-			email: 'admin@admin.com',
-			password: 'admin123'
-		})
+	const existingAdmin = await db.query.user.findFirst({
+		where: eq(authSchema.user.email, 'admin@admin.com')
 	});
 
-    if (!response.ok) {
-        const text = await response.text();
-        console.error('Status:', response.status);
-        console.error('Response:', text);
-        process.exit(1);
-    }
-
-    // Update role directly in the database
-    const client = createClient({ url: env.DATABASE_URL });
-    const db = drizzle(client, { schema: { ...schema } });
-
-    await db.update(authSchema.user)
-        .set({ role: 'ADMIN' })
-        .where(eq(authSchema.user.email, 'admin@admin.com'));
-
-    console.log('Demo user created successfully!');
-
-	const existingBooks = await db.select().from(schema.book).limit(1);
-
-	if (existingBooks.length === 0) {
-		await db.insert(schema.book).values([
-			{
-				title: 'The Hobbit',
-				author: 'J.R.R. Tolkien',
-				description: 'A hobbit goes on an unexpected journey.',
-				genre: 'Fantasy',
-				price: 1499,
-				stock: 10,
-				image: 'hobbit.jpg'
+	if (!existingAdmin) {
+		const response = await fetch(`${env.ORIGIN}/api/auth/sign-up/email`, {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				Origin: env.ORIGIN
 			},
-			{
-				title: 'Dune',
-				author: 'Frank Herbert',
-				description: 'A sci-fi epic on Arrakis.',
-				genre: 'Science Fiction',
-				price: 1799,
-				stock: 8,
-				image: 'dune.jpg'
-			},
-			{
-				title: 'The Martian',
-				author: 'Andy Weir',
-				description: 'Survival on Mars.',
-				genre: 'Science Fiction',
-				price: 1399,
-				stock: 12,
-				image: 'martian.jpg'
-			},
-			{
-				title: 'Stormbreaker',
-				author: 'Anthony Horowitz',
-				description: 'The first Alex Rider adventure.',
-				genre: 'Action Adventure',
-				price: 799,
-				stock: 10,
-				image: 'stormbreaker.jpg'
-			}
-		]);
+			body: JSON.stringify({
+				name: 'Admin',
+				email: 'admin@admin.com',
+				password: 'admin123'
+			})
+		});
 
-		console.log('Books seeded.');
+		if (!response.ok) {
+			const text = await response.text();
+			console.error('Status:', response.status);
+			console.error('Response:', text);
+			process.exit(1);
+		}
+
+		console.log('Demo user created successfully!');
 	} else {
-		console.log('Books already exist — skipping.');
+		console.log('Admin already exists.');
 	}
+
+	await db
+		.update(authSchema.user)
+		.set({ role: 'ADMIN' })
+		.where(eq(authSchema.user.email, 'admin@admin.com'));
+
+	console.log('Admin role ready.');
+
+	await seedBooks();
 
 	process.exit(0);
 }

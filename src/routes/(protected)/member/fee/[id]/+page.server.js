@@ -7,50 +7,74 @@ import { rental } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 
 export async function load({ params, locals, url }) {
-	if (!locals.user) {
-		throw redirect(302, '/auth/login');
-	}
+	if (!locals.user) throw redirect(302, '/auth/login');
 
 	const rentalId = Number(params.id);
+
+	if (!Number.isInteger(rentalId) || rentalId < 1) {
+		throw error(400, 'Invalid rental id');
+	}
+
 	const rentalRecord = await rentalService.getRentalById(rentalId);
 
-	if (!rentalRecord) {
-		throw error(404, 'Rental not found');
+	if (!rentalRecord) throw error(404, 'Rental not found');
+
+
+	if (Number(rentalRecord.userId) !== Number(locals.user.id)) {
+		throw error(403, 'Not allowed');
 	}
 
 	const sessionId = url.searchParams.get('session_id');
-	
+
 	if (sessionId) {
 		const session = await stripe.checkout.sessions.retrieve(sessionId);
-		
-		if (session.payment_status === 'paid') {
+
+		console.log('Stripe session:', session.payment_status);
+
+		if (
+			session.payment_status === 'paid' &&
+			session.metadata?.type === 'late_fee' &&
+			Number(session.metadata?.rentalId) === rentalId
+		) {
+			await rentalService.markLateFeePaid(rentalId);
+
 			await db
 				.update(rental)
 				.set({ status: 'returned', lateReturned: true })
 				.where(eq(rental.id, rentalId));
 
-			throw redirect(303, `/member/fee/${rentalId}?paid=true`);
+			throw redirect(303, '/member/rentals?payment=success');
 		}
+
+		throw redirect(303, '/member/rentals?payment=failed');
 	}
 
 	return {
 		rental: rentalRecord,
-		feeEuro: 5,
-		paid: url.searchParams.get('paid') === 'true'
+		feeEuro: 5
 	};
 }
 
 export const actions = {
 	payLateFee: async ({ params, locals }) => {
-		if (!locals.user) {
-			throw redirect(302, '/auth/login');
-		}
+		if (!locals.user) throw redirect(302, '/auth/login');
 
 		const rentalId = Number(params.id);
+
+		if (!Number.isInteger(rentalId) || rentalId < 1) {
+			throw error(400, 'Invalid rental id');
+		}
+
 		const rentalRecord = await rentalService.getRentalById(rentalId);
 
-		if (!rentalRecord) {
-			throw error(404, 'Rental not found');
+		if (!rentalRecord) throw error(404, 'Rental not found');
+
+		if (Number(rentalRecord.userId) !== Number(locals.user.id)) {
+			throw error(403, 'Not allowed');
+		}
+
+		if (rentalRecord.status !== 'late') {
+			throw redirect(303, '/member/rentals');
 		}
 
 		const feeEuro = 5;
@@ -61,15 +85,17 @@ export const actions = {
 			payment_method_types: ['card'],
 			customer_email: locals.user.email,
 			metadata: {
-				rentalId: rentalId.toString(),
-				type: 'late_fee'
+				type: 'late_fee',
+				rentalId: rentalId.toString()
 			},
 			line_items: [
 				{
 					price_data: {
 						currency: 'eur',
 						product_data: {
-							name: `Late fee for ${rentalRecord.book?.title ?? `Book #${rentalRecord.bookId}`}`
+							name: `Late fee for ${
+								rentalRecord.book?.title ?? `Book #${rentalRecord.bookId}`
+							}`
 						},
 						unit_amount: feeCents
 					},

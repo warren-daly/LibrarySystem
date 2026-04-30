@@ -46,8 +46,12 @@ export async function load({ url, locals }) {
 export const actions = {
 	startRental: async ({ locals, request }) => {
 		if (!locals.user) throw error(401, 'Not authenticated');
+
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
+
+		if (!bookId) throw error(400, 'Invalid book');
+
 		throw redirect(303, `/member/rentals?bookId=${bookId}`);
 	},
 
@@ -77,9 +81,21 @@ export const actions = {
 
 			const allRentals = await rentalService.getAllrentals();
 
-			const hasLateRental = allRentals.some(
-				(r) => Number(r.userId) === Number(locals.user.id) && r.status === 'late'
+			const userActiveRentals = allRentals.filter(
+				(r) =>
+					Number(r.userId) === Number(locals.user.id) &&
+					(r.status === 'rented' || r.status === 'late')
 			);
+
+			if (userActiveRentals.length >= 3) {
+				return fail(400, {
+					errors: {
+						general: 'You have reached the maximum rental limit of 3 books.'
+					}
+				});
+			}
+
+			const hasLateRental = userActiveRentals.some((r) => r.status === 'late');
 
 			if (hasLateRental) {
 				return fail(400, {
@@ -89,11 +105,9 @@ export const actions = {
 				});
 			}
 
-			const alreadyRentedThisBook = allRentals.some(
-				(r) =>
-					Number(r.userId) === Number(locals.user.id) &&
-					Number(r.bookId) === Number(bookId) &&
-					(r.status === 'rented' || r.status === 'late')
+			const alreadyRentedThisBook = userActiveRentals.some(
+				(r) => 
+					Number(r.bookId) === Number(bookId)
 			);
 
 			if (alreadyRentedThisBook) {

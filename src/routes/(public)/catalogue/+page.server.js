@@ -41,17 +41,21 @@ export async function load() {
 }
 
 export const actions = {
+
 	addToCart: async ({ locals, request }) => {
 		if (!locals.user) {
 			throw redirect(303, '/auth/login?redirectTo=/catalogue');
 		}
-
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
 		const type = data.get('type');
 
 		if (!bookId) throw error(400, 'Invalid book');
 		if (!type || type !== 'buy') throw error(400, 'Invalid type');
+
+		if (!locals.user) {
+			throw redirect(303, '/auth/login?redirectTo=/catalogue');
+		}
 
 		const selectedBook = await db.query.book.findFirst({
 			where: eq(book.id, bookId)
@@ -74,9 +78,13 @@ export const actions = {
 	},
 
 	startRental: async ({ locals, request }) => {
-		if (!locals.user) throw error(401, 'Not authenticated');
+		
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
+		if (!bookId) throw error(400, 'Invalid book');
+		if (!locals.user) {
+			throw redirect(303, '/auth/login?redirectTo=/catalogue');
+		}
 		throw redirect(303, `/member/rentals?bookId=${bookId}`);
 	}
 };

@@ -49,8 +49,10 @@
         }
     }    
 </script>
-
-<h1 class="heading1">Register As a Member</h1>
+<div class="page-header">
+	<h1 class="page-title">Register</h1>
+	<p class="page-subtitle">Create an account to start renting books</p>
+</div>
 
 <div>
     <h4 class="heading2">Please enter your details below to register.</h4>
@@ -87,11 +89,6 @@
     </div>
 
 <style>
-
-	.heading1 {
-		text-align: center;
-		margin-top: 30px;
-	}
 
 	.heading2 {
 		text-align: center;

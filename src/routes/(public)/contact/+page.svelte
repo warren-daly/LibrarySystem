@@ -51,7 +51,7 @@
     }    
 </script>
 
-<div class="container py-4">
+<div class="container py-1">
     <div class="page-header mb-1 text-center">
         <h1 class="page-title display-4 fw-bold">Contact Us</h1>
         <p class="page-subtitle lead text-muted">Have any inquiries? We'd love to hear from you</p>
@@ -84,7 +84,7 @@
                 </div>
             {/if}
             
-            <form on:submit={handleSubmit} class="contact-form">
+            <form onsubmit={handleSubmit} class="contact-form">
                 <div class="mb-3">
                     <label for="name" class="form-label">Name</label>
                     <input 

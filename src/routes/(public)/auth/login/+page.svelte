@@ -4,6 +4,11 @@
     let { form } = $props();
 </script>
 
+<div class="page-header">
+	<h1 class="page-title">Login</h1>
+	<p class="page-subtitle">Access your account to manage rentals</p>
+</div>
+
 <div class="container d-flex justify-content-center align-items-center" style="min-height: 70vh;">
     <div class="card shadow-sm" style="max-width: 480px; width: 100%;">
         <div class="card-body p-4">

@@ -42,11 +42,44 @@ export const rentalService = {
 	async updateRental(id, rentalData) {
 		const validated = idSchema.parse({ id });
 		const updated = await rentalDataAccess.update(validated.id, rentalData);
-		
+
 		if (!updated) {
 			throw new Error('Rental not found');
 		}
-		
+
+		return updated;
+	},
+
+	async markLateFeePaid(id) {
+		const validated = idSchema.parse({ id });
+
+		const existingRental = await rentalDataAccess.findById(validated.id);
+
+		if (!existingRental) {
+			throw new Error('Rental not found');
+		}
+
+		const updated = await rentalDataAccess.update(validated.id, {
+			bookId: existingRental.bookId,
+			returnDate: existingRental.returnDate,
+			status: 'returned'
+		});
+
+		if (!updated) {
+			throw new Error('Rental not found');
+		}
+
+		const returnedBook = await db.query.book.findFirst({
+			where: eq(book.id, existingRental.bookId)
+		});
+
+		if (returnedBook) {
+			await db
+				.update(book)
+				.set({ stock: returnedBook.stock + 1 })
+				.where(eq(book.id, existingRental.bookId));
+		}
+
 		return updated;
 	},
 
