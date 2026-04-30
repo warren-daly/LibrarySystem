@@ -67,10 +67,13 @@
 	}
 </script>
 
+<div class="page-header">
+	<h1 class="page-title">Books Management</h1>
+	<p class="page-subtitle">Add, update, and remove books</p>
+</div>
 <section id="books-page">
 	<div class="row">
 		<div class="d-flex flex-column justify-content-between align-items-center">
-			<h1 class="h3 mb-0 ">Books Management</h1>
 			<div class="row">
 				<div class="col-md-2 w-100 py-1">
 					<button
@@ -207,19 +210,16 @@
 {/if}
 
 <style>
+	.card.shadow-sm {
+		margin-bottom: 2rem;
+		background-color: rgb(183, 182, 182);
+	}
 
-.card.shadow-sm {
-  margin-bottom: 2rem;
-  background-color: rgb(183, 182, 182);
-}
+	.card-body {
+		padding: 1.5rem;
+	}
 
-.card-body {
-  padding: 1.5rem;
-}
-
-#books-page {
-  padding: 1rem;
-}
-
-
+	#books-page {
+		padding: 1rem;
+	}
 </style>

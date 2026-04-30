@@ -7,10 +7,10 @@
 	}
 </script>
 
-<div class="container py-5" role="main" aria-labelledby="dashboard-title">
-	<div class="page-header mb-4 text-center">
+<div class="container py-1" role="main" aria-labelledby="dashboard-title">
+	<div class="page-header">
 		<h1 id="dashboard-title" class="page-title">
-			<i class="bi bi-person-circle me-2" aria-hidden="true"></i>
+			<i class="bi bi-person-circle" aria-hidden="true"></i>
 			Member Dashboard
 		</h1>
 		<p class="page-subtitle">
@@ -48,7 +48,7 @@
 					<h2 class="my-3">{data.totalRentals}</h2>
 
 					<div class="mt-auto">
-						<a href="/member/rentals?status=rented" class="btn btn-primary" aria-label="View my rentals">
+						<a href="/member/rentals" class="btn btn-primary" aria-label="View my rentals">
 							<i class="bi bi-receipt me-1" aria-hidden="true"></i>
 							My Rentals
 						</a>
@@ -58,21 +58,17 @@
 		</div>
 
 		<div class="col-md-3">
-			<div
-				class="card h-100 shadow-sm text-center"
-				role="region"
-				aria-label="Active rentals overview"
-			>
+			<div class="card h-100 shadow-sm text-center" role="region" aria-label="Active rentals overview">
 				<div class="card-body d-flex flex-column">
-					<i class="bi bi-journal-check fs-1 text-info mb-2" aria-hidden="true"></i>
+					<i class="bi bi-check-circle-fill fs-1 text-info mb-2" aria-hidden="true"></i>
 					<h5 class="card-title">Active Rentals</h5>
 					<p class="card-text">Books you currently have rented.</p>
 
 					<h2 class="my-3">{data.activeRentals}</h2>
 
 					<div class="mt-auto">
-						<a href="/member/rentals?status=returned" class="btn btn-primary" aria-label="View active rentals">
-							<i class="bi bi-journal-check me-1" aria-hidden="true"></i>
+						<a href="/member/rentals?status=rented" class="btn btn-primary" aria-label="View active rentals">
+							<i class="bi bi-check-circle-fill me-1" aria-hidden="true"></i>
 							View Active
 						</a>
 					</div>
@@ -81,13 +77,9 @@
 		</div>
 
 		<div class="col-md-3">
-			<div
-				class="card h-100 shadow-sm text-center"
-				role="region"
-				aria-label="Late rentals overview"
-			>
+			<div class="card h-100 shadow-sm text-center" role="region" aria-label="Late rentals overview">
 				<div class="card-body d-flex flex-column">
-					<i class="bi bi-exclamation-triangle fs-1 text-warning mb-2" aria-hidden="true"></i>
+					<i class="bi bi-exclamation-triangle-fill fs-1 text-warning mb-2" aria-hidden="true"></i>
 					<h5 class="card-title">Late Rentals</h5>
 					<p class="card-text">Books that are overdue for return.</p>
 
@@ -95,7 +87,7 @@
 
 					<div class="mt-auto">
 						<a href="/member/rentals?status=late" class="btn btn-primary" aria-label="View late rentals">
-							<i class="bi bi-exclamation-triangle me-1" aria-hidden="true"></i>
+							<i class="bi bi-exclamation-triangle-fill me-1" aria-hidden="true"></i>
 							View Late
 						</a>
 					</div>
@@ -124,7 +116,7 @@
 
 				<tbody>
 					{#if data.recentRentals?.length}
-						{#each data.recentRentals as rental}
+						{#each data.recentRentals as rental (rental)}
 							<tr>
 								<td>{rental.id}</td>
 								<td>{rental.book?.title ?? `Book #${rental.bookId}`}</td>

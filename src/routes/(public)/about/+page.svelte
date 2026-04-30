@@ -1,4 +1,7 @@
-<h1 class="heading1">About Us</h1>
+<div class="page-header">
+	<h1 class="page-title">About Us</h1>
+	<p class="page-subtitle">Learn more about our online library system</p>
+</div>
 
 <div class="about-container">
 
@@ -39,11 +42,6 @@
 </div>
 
 <style>
-
-	.heading1 {
-		text-align: center;
-		margin-top: 30px;
-	}
 
 	.about-container {
 		max-width: 1000px;

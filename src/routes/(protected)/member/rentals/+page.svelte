@@ -14,30 +14,29 @@
 
 	let filteredRentals = $derived.by(() => {
 		if (!filterStatus) return rentals;
-		return rentals.filter(r => r.status === filterStatus);
+		return rentals.filter((r) => r.status === filterStatus);
 	});
-	
+
 	function hideForm() {
 		showForm = false;
 	}
 </script>
 
+<div class="page-header">
+	<h1 class="page-title">My Rentals</h1>
+	<p class="page-subtitle">View and manage your rented books</p>
+</div>
 <section id="rentals-page">
 	<div class="container py-4">
-		<h1 class="mb-4 text-center">My Rentals</h1>
-
 		{#if selectedBookId && showForm}
 			<div class="card shadow-sm mb-4">
-				<div class="card-header bg-success text-white border-0">
-					<h5 class="mb-0">Create New Rental</h5>
-				</div>
 				<div class="card-body p-4">
 					<RentalForm
-						{books}
-						{selectedBookId}
-						{currentUser}
-						onCancel={hideForm}
-					/>
+						{books} 
+						{selectedBookId} 
+						{currentUser} 
+						onCancel={hideForm} 
+						/>
 				</div>
 			</div>
 		{/if}
@@ -69,15 +68,17 @@
 									<td class="ps-4">{r.id}</td>
 									<td>{r.book?.title ?? `Book #${r.bookId}`}</td>
 									<td>
-										<span class={`badge ${
-											r.status === 'late'
-												? 'bg-danger'
-												: r.status === 'returned'
-													? 'bg-primary'
-													: r.status === 'cancelled'
-														? 'bg-secondary'
-														: 'bg-success'
-										}`}>
+										<span
+											class={`badge ${
+												r.status === 'late'
+													? 'bg-danger'
+													: r.status === 'returned'
+														? 'bg-primary'
+														: r.status === 'cancelled'
+															? 'bg-secondary'
+															: 'bg-success'
+											}`}
+										>
 											{r.status.charAt(0).toUpperCase() + r.status.slice(1)}
 										</span>
 									</td>
@@ -88,21 +89,23 @@
 											{#if r.status === 'rented'}
 												<form method="POST" action="?/returnRental">
 													<input type="hidden" name="rentalId" value={r.id} />
-													<button
-														type="submit"
-														class="btn btn-sm btn-outline-success"
-													>
+													<button type="submit" class="btn btn-sm btn-outline-success">
 														<i class="bi bi-box-arrow-in-left"></i> Return
 													</button>
 												</form>
 											{/if}
-											
+
 											{#if r.status === 'returned' && !r.hasReview}
 												<form method="POST" action="?/LeaveReview">
 													<input type="hidden" name="bookId" value={r.bookId} />
 													<div class="mb-2">
 														<label for="rating-{r.id}" class="form-label">Rating (1-5):</label>
-														<select id="rating-{r.id}" name="rating" class="form-select form-select-sm" required>
+														<select
+															id="rating-{r.id}"
+															name="rating"
+															class="form-select form-select-sm"
+															required
+														>
 															<option value="">Select rating</option>
 															<option value="1">1 - Poor</option>
 															<option value="2">2 - Fair</option>
@@ -112,26 +115,36 @@
 														</select>
 													</div>
 													<div class="mb-2">
-														<textarea name="reviewText" class="form-control form-control-sm" placeholder="Write a review (optional)" rows="3"></textarea>
+														<textarea
+															name="reviewText"
+															class="form-control form-control-sm"
+															placeholder="Write a review (optional)"
+															rows="3"
+														></textarea>
 													</div>
-													<button type="submit" class="btn btn-sm btn-success">Submit Review</button>
+													<button type="submit" class="btn btn-sm btn-success">Submit Review</button
+													>
 												</form>
 											{/if}
-											
+
 											{#if r.rating}
 												<div class="rating-stars">
-													{#each Array(5) as _, i}
-														<i class="bi bi-star{i < Math.round(r.rating) ? '-fill' : ''} rating-star"></i>
+													{#each Array(5) as _, i (i)}
+														<i
+															class="bi bi-star{i < Math.round(r.rating)
+																? '-fill'
+																: ''} rating-star"
+														></i>
 													{/each}
 													<span class="ms-2">{r.rating} / 5</span>
 												</div>
 											{/if}
-											
+
 											{#if r.status === 'late'}
-												<a
-													href={`/member/fee/${r.id}`}
+												<a 
+													href={`/member/fee/${r.id}`} 
 													class="btn btn-sm btn-outline-danger"
-												>
+													>
 													<i class="bi bi-credit-card"></i> Pay
 												</a>
 											{/if}

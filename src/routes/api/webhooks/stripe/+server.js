@@ -70,5 +70,4 @@ export const POST = async ({ request }) => {
 
 return json({ received: true });
 
-  return json({ received: true });
 };

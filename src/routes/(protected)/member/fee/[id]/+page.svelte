@@ -2,7 +2,7 @@
 	let { data } = $props();
 </script>
 
-<div class="container py-5">
+<div class="container py-1">
 	<div class="card shadow-sm mx-auto" style="max-width: 500px;">
 		<div class="card-body text-center">
 			<h2 class="mb-3">Late Fee</h2>
