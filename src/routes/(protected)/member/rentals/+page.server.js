@@ -5,6 +5,7 @@ import { review, book } from '$lib/server/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { eq, and } from 'drizzle-orm';
 import { ZodError } from 'zod';
+import { sendRentalConfirmationEmail, sendReturnConfirmationEmail, sendLateReturnEmail } from '$lib/server/email/email-service.js';
 
 export async function load({ url, locals }) {
 	try {
@@ -36,11 +37,11 @@ export async function load({ url, locals }) {
 			selectedBookId: selectedBookId ? Number(selectedBookId) : null,
 			currentUser: locals.user ?? null
 		};
-	} catch (err) {
-		console.error('Error retrieving rentals:', err);
-		throw error(500, 'Failed to load rentals');
+		} catch (err) {
+			console.error('Error retrieving rentals:', err);
+			throw error(500, 'Failed to load rentals');
+		}
 	}
-}
 
 export const actions = {
 	startRental: async ({ locals, request }) => {
@@ -127,6 +128,14 @@ export const actions = {
 				.set({ stock: selectedBook.stock - 1 })
 				.where(eq(book.id, bookId));
 
+			sendRentalConfirmationEmail({
+				to: locals.user.email,
+				bookTitle: selectedBook.title,
+				returnDate: rentalData.returnDate
+			}).catch((err) => {
+				console.error('Rental confirmation email failed:', err);
+			});
+
 			return { success: true };
 		} catch (err) {
 			console.error('Error creating rental:', err);
@@ -180,6 +189,18 @@ export const actions = {
 					status: 'late'
 				});
 
+				const lateBook = await db.query.book.findFirst({
+						where: eq(book.id, existingRental.bookId)
+					});
+
+				sendLateReturnEmail({
+					to: locals.user.email,
+					bookTitle: lateBook?.title ?? `Book ID ${existingRental.bookId}`,
+					returnDate: existingRental.returnDate
+				}).catch((err) => {
+					console.error('Late return email failed:', err);
+				});
+
 				throw redirect(303, `/member/late-fee/${id}`);
 			}
 
@@ -200,11 +221,18 @@ export const actions = {
 					.where(eq(book.id, existingRental.bookId));
 			}
 
+			sendReturnConfirmationEmail({
+				to: locals.user.email,
+				bookTitle: returnedBook?.title ?? `Book ID ${existingRental.bookId}`
+			}).catch((err) => {
+				console.error('Return confirmation email failed:', err);
+			});
+
 			return { success: true };
-		} catch (err) {
-			if (err?.status === 303) {
-				throw err;
-			}
+			} catch (err) {
+				if (err?.status === 303) {
+					throw err;
+				}
 
 			console.error('Error returning rental:', err);
 

@@ -5,12 +5,20 @@ const resend = new Resend(env.RESEND_API_KEY);
 export const resend_email = (env.RESEND_EMAIL)
 
 export async function sendEmail({ to, subject, html }) {
-	await resend.emails.send({
+	const result = await resend.emails.send({
 		from: 'Online Library <onboarding@resend.dev>',
 		to,
 		subject,
 		html
 	});
+
+	if (result.error) {
+		throw new Error(result.error.message);
+	}
+
+	console.log('Resend email accepted:', result.data?.id);
+
+	return result;
 }
 
 export async function sendPasswordResetEmail({ to, url }) {
@@ -69,15 +77,15 @@ export async function sendRegistrationConfirmationEmail({ to, name }) {
 	});
 }
 
-export async function sendPaymentConfirmationEmail({ to, amount }) {
+export async function sendPaymentConfirmationEmail({ to, amount, paymentType = 'Payment' }) {
 	await sendEmail({
 		to,
-		subject: 'Payment Confirmation',
+		subject: `${paymentType} Confirmation`,
 		html: `
-			<h2>Payment Successful</h2>
+			<h2>${paymentType} Successful</h2>
 			<p>Your payment has been received successfully.</p>
 			<p><strong>Amount paid:</strong> €${(amount / 100).toFixed(2)}</p>
-			<p>Thank you for keeping your Online Library account up to date.</p>
+			<p>Thank you for using the Online Library.</p>
 			<hr>
 			<p style="font-size: 12px; color: #666;">This is an automated email from the Online Library.</p>
 		`
