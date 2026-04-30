@@ -1,11 +1,17 @@
 import { db } from '$lib/server/db';
-import { book, review } from '$lib/server/db/schema';
+import { book, review, rental } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { cartService } from '$lib/server/services/cart-service.js';
 import { redirect, error, fail } from '@sveltejs/kit';
 
 export async function load() {
 	const books = await db.select().from(book);
+
+	const allRentals = await db.query.rental.findMany({
+		with: {
+			book: true
+		}
+	});
 
 	const booksWithRatings = await Promise.all(
 		books.map(async (b) => {
@@ -18,10 +24,15 @@ export async function load() {
 					? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
 					: null;
 
+			const activeRental = allRentals.find(
+				r => r.bookId === b.id && r.status === 'rented'
+			);
+
 			return {
 				...b,
 				averageRating,
-				reviewCount: reviews.length
+				reviewCount: reviews.length,
+				nextAvailableDate: activeRental?.returnDate || null
 			};
 		})
 	);
@@ -30,17 +41,21 @@ export async function load() {
 }
 
 export const actions = {
+
 	addToCart: async ({ locals, request }) => {
 		if (!locals.user) {
 			throw redirect(303, '/auth/login?redirectTo=/catalogue');
 		}
-
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
 		const type = data.get('type');
 
 		if (!bookId) throw error(400, 'Invalid book');
 		if (!type || type !== 'buy') throw error(400, 'Invalid type');
+
+		if (!locals.user) {
+			throw redirect(303, '/auth/login?redirectTo=/catalogue');
+		}
 
 		const selectedBook = await db.query.book.findFirst({
 			where: eq(book.id, bookId)
@@ -63,9 +78,13 @@ export const actions = {
 	},
 
 	startRental: async ({ locals, request }) => {
-		if (!locals.user) throw error(401, 'Not authenticated');
+		
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
+		if (!bookId) throw error(400, 'Invalid book');
+		if (!locals.user) {
+			throw redirect(303, '/auth/login?redirectTo=/catalogue');
+		}
 		throw redirect(303, `/member/rentals?bookId=${bookId}`);
 	}
 };

@@ -46,8 +46,12 @@ export async function load({ url, locals }) {
 export const actions = {
 	startRental: async ({ locals, request }) => {
 		if (!locals.user) throw error(401, 'Not authenticated');
+
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
+
+		if (!bookId) throw error(400, 'Invalid book');
+
 		throw redirect(303, `/member/rentals?bookId=${bookId}`);
 	},
 
@@ -77,9 +81,21 @@ export const actions = {
 
 			const allRentals = await rentalService.getAllrentals();
 
-			const hasLateRental = allRentals.some(
-				(r) => Number(r.userId) === Number(locals.user.id) && r.status === 'late'
+			const userActiveRentals = allRentals.filter(
+				(r) =>
+					Number(r.userId) === Number(locals.user.id) &&
+					(r.status === 'rented' || r.status === 'late')
 			);
+
+			if (userActiveRentals.length >= 3) {
+				return fail(400, {
+					errors: {
+						general: 'You have reached the maximum rental limit of 3 books.'
+					}
+				});
+			}
+
+			const hasLateRental = userActiveRentals.some((r) => r.status === 'late');
 
 			if (hasLateRental) {
 				return fail(400, {
@@ -89,11 +105,9 @@ export const actions = {
 				});
 			}
 
-			const alreadyRentedThisBook = allRentals.some(
-				(r) =>
-					Number(r.userId) === Number(locals.user.id) &&
-					Number(r.bookId) === Number(bookId) &&
-					(r.status === 'rented' || r.status === 'late')
+			const alreadyRentedThisBook = userActiveRentals.some(
+				(r) => 
+					Number(r.bookId) === Number(bookId)
 			);
 
 			if (alreadyRentedThisBook) {
@@ -156,99 +170,9 @@ export const actions = {
 	},
 
 	returnRental: async ({ request, locals }) => {
-		try {
-			const formData = await request.formData();
-			const id = Number(formData.get('rentalId'));
-
-			const existingRental = await rentalService.getRentalById(id);
-
-			if (!existingRental) {
-				return fail(404, {
-					errors: { general: 'Rental not found' }
-				});
-			}
-
-			if (Number(existingRental.userId) !== Number(locals.user?.id)) {
-				return fail(403, {
-					errors: { general: 'Not allowed' }
-				});
-			}
-
-			if (existingRental.status === 'returned' || existingRental.status === 'cancelled') {
-				return fail(400, {
-					errors: { general: 'This rental cannot be returned' }
-				});
-			}
-
-			const isLate = new Date() > new Date(existingRental.returnDate);
-
-			if (isLate) {
-				await rentalService.updateRental(id, {
-					bookId: existingRental.bookId,
-					returnDate: existingRental.returnDate,
-					status: 'late'
-				});
-
-				const lateBook = await db.query.book.findFirst({
-						where: eq(book.id, existingRental.bookId)
-					});
-
-				sendLateReturnEmail({
-					to: locals.user.email,
-					bookTitle: lateBook?.title ?? `Book ID ${existingRental.bookId}`,
-					returnDate: existingRental.returnDate
-				}).catch((err) => {
-					console.error('Late return email failed:', err);
-				});
-
-				throw redirect(303, `/member/late-fee/${id}`);
-			}
-
-			await rentalService.updateRental(id, {
-				bookId: existingRental.bookId,
-				returnDate: existingRental.returnDate,
-				status: 'returned'
-			});
-
-			const returnedBook = await db.query.book.findFirst({
-				where: eq(book.id, existingRental.bookId)
-			});
-
-			if (returnedBook) {
-				await db
-					.update(book)
-					.set({ stock: returnedBook.stock + 1 })
-					.where(eq(book.id, existingRental.bookId));
-			}
-
-			sendReturnConfirmationEmail({
-				to: locals.user.email,
-				bookTitle: returnedBook?.title ?? `Book ID ${existingRental.bookId}`
-			}).catch((err) => {
-				console.error('Return confirmation email failed:', err);
-			});
-
-			return { success: true };
-			} catch (err) {
-				if (err?.status === 303) {
-					throw err;
-				}
-
-			console.error('Error returning rental:', err);
-
-			if (err instanceof ZodError) {
-				const errors = {};
-				err.issues.forEach((issue) => {
-					const field = issue.path[0]?.toString();
-					if (field) errors[field] = issue.message;
-				});
-				return fail(400, { errors });
-			}
-
-			return fail(500, {
-				errors: { general: err instanceof Error ? err.message : 'Failed to return rental' }
-			});
-		}
+		const formData = await request.formData();
+		const rentalId = formData.get('rentalId');
+		return rentalService.handleReturnRental(rentalId, locals.user?.id);
 	},
 
 	LeaveReview: async ({ request, locals }) => {

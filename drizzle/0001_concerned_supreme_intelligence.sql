@@ -1,0 +1,1 @@
+ALTER TABLE `rental` ADD `lateReturned` integer DEFAULT false;

@@ -1,6 +1,7 @@
 <script>
 	import 'bootstrap/dist/css/bootstrap.min.css';
 	import 'bootstrap-icons/font/bootstrap-icons.min.css';
+	import '$lib/styles/global.css';
 	import Footer from '$lib/components/Footer.svelte';
 	import GuestMenu from '$lib/components/nav/GuestMenu.svelte';
 	import MemberMenu from '$lib/components/nav/MemberMenu.svelte';

@@ -19,7 +19,8 @@ export const rental = sqliteTable('rental', {
 	bookId: integer().notNull(),
 	rentalDate: integer({ mode: 'timestamp_ms' }).notNull().$defaultFn(() => new Date()),
 	returnDate: integer({ mode: 'timestamp_ms' }).notNull(),
-	status: text().notNull().default('rented')
+	status: text().notNull().default('rented'),
+  lateReturned: integer({ mode: 'boolean' }).default(false)
 });
 
 export const review = sqliteTable('review', {

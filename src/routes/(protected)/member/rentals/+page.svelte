@@ -14,142 +14,166 @@
 
 	let filteredRentals = $derived.by(() => {
 		if (!filterStatus) return rentals;
-		return rentals.filter(r => r.status === filterStatus);
+		return rentals.filter((r) => r.status === filterStatus);
 	});
-	
+
 	function hideForm() {
 		showForm = false;
 	}
 </script>
 
+<div class="page-header">
+	<h1 class="page-title">My Rentals</h1>
+	<p class="page-subtitle">View and manage your rented books</p>
+</div>
+
 <section id="rentals-page">
-	<div class="container py-4">
-		<h1 class="mb-4 text-center">My Rentals</h1>
+	<div class="row justify-content-center">
+		<div class="col-lg-8">
+			{#if selectedBookId && showForm}
+				<div class="card shadow-sm mb-4">
+					<div class="card-body p-3">
+						<RentalForm
+							{books}
+							{selectedBookId}
+							{currentUser}
+							onCancel={hideForm}
+						/>
+					</div>
+				</div>
+			{/if}
 
-		{#if selectedBookId && showForm}
-			<div class="card shadow-sm mb-4">
-				<div class="card-header bg-success text-white border-0">
-					<h5 class="mb-0">Create New Rental</h5>
-				</div>
-				<div class="card-body p-4">
-					<RentalForm
-						{books}
-						{selectedBookId}
-						{currentUser}
-						onCancel={hideForm}
-					/>
-				</div>
+			<div class="filter-buttons mb-4 d-flex gap-2 justify-content-center">
+				<a href="/member/rentals" class="btn btn-sm btn-outline-secondary">All</a>
+				<a href="/member/rentals?status=rented" class="btn btn-sm btn-outline-success">Active</a>
+				<a href="/member/rentals?status=returned" class="btn btn-sm btn-outline-primary">Returned</a>
+				<a href="/member/rentals?status=late" class="btn btn-sm btn-outline-danger">Late</a>
 			</div>
-		{/if}
 
-		<div class="filter-buttons mb-4 d-flex gap-2 justify-content-center">
-			<a href="/member/rentals" class="btn btn-sm btn-outline-secondary">All</a>
-			<a href="/member/rentals?status=rented" class="btn btn-sm btn-outline-primary">Active</a>
-			<a href="/member/rentals?status=returned" class="btn btn-sm btn-outline-success">Returned</a>
-			<a href="/member/rentals?status=late" class="btn btn-sm btn-outline-danger">Late</a>
-		</div>
-
-		<div class="card shadow-sm">
-			<div class="card-body p-0">
-				<div class="table-responsive">
-					<table class="table table-hover align-middle mb-0">
-						<thead class="table-light">
-							<tr>
-								<th class="ps-4">ID</th>
-								<th>Book</th>
-								<th>Status</th>
-								<th>Rental Date</th>
-								<th>Return Date</th>
-								<th class="pe-4 text-center">Actions</th>
-							</tr>
-						</thead>
-						<tbody>
-							{#each filteredRentals as r (r.id)}
+			<div class="card shadow-sm">
+				<div class="card-body p-0">
+					<div class="table-responsive">
+						<table class="table table-hover align-middle mb-0">
+							<thead class="table-light">
 								<tr>
-									<td class="ps-4">{r.id}</td>
-									<td>{r.book?.title ?? `Book #${r.bookId}`}</td>
-									<td>
-										<span class={`badge ${
-											r.status === 'late'
-												? 'bg-danger'
-												: r.status === 'returned'
-													? 'bg-primary'
-													: r.status === 'cancelled'
-														? 'bg-secondary'
-														: 'bg-success'
-										}`}>
-											{r.status.charAt(0).toUpperCase() + r.status.slice(1)}
-										</span>
-									</td>
-									<td>{new Date(r.rentalDate).toLocaleDateString('en-IE')}</td>
-									<td>{new Date(r.returnDate).toLocaleDateString('en-IE')}</td>
-									<td class="pe-4 text-center">
-										<div class="d-flex gap-2 justify-content-center flex-wrap">
-											{#if r.status === 'rented'}
-												<form method="POST" action="?/returnRental">
-													<input type="hidden" name="rentalId" value={r.id} />
-													<button
-														type="submit"
-														class="btn btn-sm btn-outline-success"
-													>
-														<i class="bi bi-box-arrow-in-left"></i> Return
-													</button>
-												</form>
-											{/if}
-											
-											{#if r.status === 'returned' && !r.hasReview}
-												<form method="POST" action="?/LeaveReview">
-													<input type="hidden" name="bookId" value={r.bookId} />
-													<div class="mb-2">
-														<label for="rating-{r.id}" class="form-label">Rating (1-5):</label>
-														<select id="rating-{r.id}" name="rating" class="form-select form-select-sm" required>
-															<option value="">Select rating</option>
-															<option value="1">1 - Poor</option>
-															<option value="2">2 - Fair</option>
-															<option value="3">3 - Good</option>
-															<option value="4">4 - Very Good</option>
-															<option value="5">5 - Excellent</option>
-														</select>
-													</div>
-													<div class="mb-2">
-														<textarea name="reviewText" class="form-control form-control-sm" placeholder="Write a review (optional)" rows="3"></textarea>
-													</div>
-													<button type="submit" class="btn btn-sm btn-success">Submit Review</button>
-												</form>
-											{/if}
-											
-											{#if r.rating}
-												<div class="rating-stars">
-													{#each Array(5) as _, i}
-														<i class="bi bi-star{i < Math.round(r.rating) ? '-fill' : ''} rating-star"></i>
-													{/each}
-													<span class="ms-2">{r.rating} / 5</span>
-												</div>
-											{/if}
-											
-											{#if r.status === 'late'}
-												<a
-													href={`/member/fee/${r.id}`}
-													class="btn btn-sm btn-outline-danger"
-												>
-													<i class="bi bi-credit-card"></i> Pay
-												</a>
-											{/if}
-										</div>
-									</td>
+									<th class="ps-4">ID</th>
+									<th>Book</th>
+									<th>Status</th>
+									<th>Rental Date</th>
+									<th>Return Date</th>
+									<th class="pe-4 text-center">Actions</th>
 								</tr>
-							{/each}
+							</thead>
 
-							{#if filteredRentals.length === 0}
-								<tr>
-									<td colspan="6" class="text-center py-5 text-muted">
-										<i class="bi bi-inbox fs-1 d-block mb-2"></i>
-										<p>No rentals found.</p>
-									</td>
-								</tr>
-							{/if}
-						</tbody>
-					</table>
+							<tbody>
+								{#each filteredRentals as r (r.id)}
+									<tr>
+										<td class="ps-4">{r.id}</td>
+										<td>{r.book?.title ?? `Book #${r.bookId}`}</td>
+										<td>
+											<span
+												class={`badge ${
+													r.status === 'late'
+														? 'bg-danger'
+														: r.status === 'returned'
+															? 'bg-primary'
+															: r.status === 'cancelled'
+																? 'bg-secondary'
+																: 'bg-success'
+												}`}
+											>
+												{r.status.charAt(0).toUpperCase() + r.status.slice(1)}
+											</span>
+										</td>
+										<td>{new Date(r.rentalDate).toLocaleDateString('en-IE')}</td>
+										<td>{new Date(r.returnDate).toLocaleDateString('en-IE')}</td>
+										<td class="pe-4 text-center">
+											<div class="d-flex gap-2 justify-content-center flex-wrap">
+												{#if r.status === 'rented'}
+													<form method="POST" action="?/returnRental">
+														<input type="hidden" name="rentalId" value={r.id} />
+														<button type="submit" class="btn btn-sm btn-outline-success">
+															<i class="bi bi-box-arrow-in-left" aria-hidden="true"></i>
+															Return
+														</button>
+													</form>
+												{/if}
+
+												{#if r.status === 'returned' && !r.hasReview}
+													<form method="POST" action="?/LeaveReview">
+														<input type="hidden" name="bookId" value={r.bookId} />
+
+														<div class="mb-2">
+															<label for="rating-{r.id}" class="form-label">Rating (1-5):</label>
+															<select
+																id="rating-{r.id}"
+																name="rating"
+																class="form-select form-select-sm"
+																required
+															>
+																<option value="">Select rating</option>
+																<option value="1">1 - Poor</option>
+																<option value="2">2 - Fair</option>
+																<option value="3">3 - Good</option>
+																<option value="4">4 - Very Good</option>
+																<option value="5">5 - Excellent</option>
+															</select>
+														</div>
+
+														<div class="mb-2">
+															<textarea
+																name="reviewText"
+																class="form-control form-control-sm"
+																placeholder="Write a review (optional)"
+																rows="3"
+															></textarea>
+														</div>
+
+														<button type="submit" class="btn btn-sm btn-success">
+															Submit Review
+														</button>
+													</form>
+												{/if}
+
+												{#if r.rating}
+													<div class="rating-stars">
+														{#each Array(5) as _, i (i)}
+															<i
+																class="bi bi-star{i < Math.round(r.rating)
+																	? '-fill'
+																	: ''} rating-star"
+																aria-hidden="true"
+															></i>
+														{/each}
+														<span class="ms-2">{r.rating} / 5</span>
+													</div>
+												{/if}
+
+												{#if r.status === 'late'}
+													<a 
+														href={`/member/fee/${r.id}`} 
+														class="btn btn-sm btn-outline-danger"
+														>
+														<i class="bi bi-credit-card" aria-hidden="true"></i>
+														Pay
+													</a>
+												{/if}
+											</div>
+										</td>
+									</tr>
+								{/each}
+
+								{#if filteredRentals.length === 0}
+									<tr>
+										<td colspan="6" class="text-center py-5 text-muted">
+											<i class="bi bi-inbox fs-1 d-block mb-2" aria-hidden="true"></i>
+											<p>No rentals found.</p>
+										</td>
+									</tr>
+								{/if}
+							</tbody>
+						</table>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -165,12 +189,6 @@
 		border: none;
 		border-radius: 10px;
 		box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-	}
-
-	.card-header {
-		background-color: #f8f9fa;
-		border-bottom: 1px solid #dee2e6;
-		border-radius: 10px 10px 0 0;
 	}
 
 	.table tr:hover {

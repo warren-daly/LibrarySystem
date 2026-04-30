@@ -1,32 +1,32 @@
 <script>
-    import { authClient } from '$lib/auth-client';
+	import { authClient } from '$lib/auth-client';
 
-    let email = $state('');
-    let errorMessage = $state('');
-    let successMessage = $state('');
+	let email = $state('');
+	let errorMessage = $state('');
+	let successMessage = $state('');
 
-    async function handleForgotPassword(e) {
-        e.preventDefault();
-        errorMessage = '';
-        successMessage = '';
+	async function handleForgotPassword(e) {
+		e.preventDefault();
+		errorMessage = '';
+		successMessage = '';
 
-        if (!email.trim()) {
-            errorMessage = 'Please enter a valid email address.';
-            return;
-        }
+		if (!email.trim()) {
+			errorMessage = 'Please enter a valid email address.';
+			return;
+		}
 
-        const { error } = await authClient.requestPasswordReset({
-            email: email.trim(),
-            redirectTo: '/auth/reset-password'
-        });
+		const { error } = await authClient.requestPasswordReset({
+			email: email.trim(),
+			redirectTo: '/auth/reset-password'
+		});
 
-        if (error) {
-            errorMessage = error.message || 'Could not send reset email.';
-        } else {
-            successMessage =
+		if (error) {
+			errorMessage = error.message || 'Could not send reset email.';
+		} else {
+			successMessage =
                 'If an account exists for this email, a password reset link has been sent.';
-        }
-    }
+		}
+	}
 </script>
 
 <div class="container d-flex justify-content-center align-items-start py-5">

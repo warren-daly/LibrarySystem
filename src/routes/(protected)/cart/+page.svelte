@@ -23,14 +23,12 @@
 		}
 	}
 </script>
-
+<div class="page-header">
+	<h1 class="page-title">Your Cart</h1>
+	<p class="page-subtitle">Review books before checkout</p>
+</div>
 <div class="page-wrapper">
 	<div class="container py-5">
-		<div class="page-header mb-5">
-			<h1 class="h2 fw-bold mb-1">Your Cart</h1>
-			<p class="text-muted">Review your items before checkout</p>
-		</div>
-
 		{#if data.items.length === 0}
 			<div class="empty-state card border-0 shadow-sm">
 				<div class="card-body text-center py-5">
@@ -62,7 +60,7 @@
 									</tr>
 								</thead>
 								<tbody>
-									{#each rentedItems as item}
+									{#each rentedItems as item(item)}
 										<tr>
 											<td class="ps-4 fw-500">{item.title}</td>
 											<td class="text-end">{euro.format(item.unitPrice / 100)}</td>
@@ -119,7 +117,7 @@
 									</tr>
 								</thead>
 								<tbody>
-									{#each boughtItems as item}
+									{#each boughtItems as item(item)}
 										<tr>
 											<td class="ps-4 fw-500">{item.title}</td>
 											<td class="text-end">{euro.format(item.unitPrice / 100)}</td>

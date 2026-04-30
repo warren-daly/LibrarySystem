@@ -48,7 +48,7 @@ export const insertBookSchema = createInsertSchema(book, {
 	title: z.string().min(1, 'Title is required'),
 	author: z.string().min(1, 'Author is required'),
 	description: z.string().optional(),
-	genre: z.string().min(1, 'Genre is required'),
+	genre: z.string().min(1, 'Genre is required').regex(/^[A-Za-z\s-]+$/, 'Genre must only contain letters, spaces, or hyphens'),
 	price: z.number().int().min(1, 'Price must be at least 1 cent'),
 	image: z.string().optional(),
 	stock: z.number().int().min(0, 'Stock cannot be negative')

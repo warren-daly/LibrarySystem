@@ -67,10 +67,13 @@
 	}
 </script>
 
+<div class="page-header">
+	<h1 class="page-title">Books Management</h1>
+	<p class="page-subtitle">Add, update, and remove books</p>
+</div>
 <section id="books-page">
 	<div class="row">
 		<div class="d-flex flex-column justify-content-between align-items-center">
-			<h1 class="h3 mb-0 ">Books Management</h1>
 			<div class="row">
 				<div class="col-md-2 w-100 py-1">
 					<button
@@ -99,7 +102,6 @@
 
 			<div class="row">
 				<div class="col-12">
-					<div class="card shadow-sm">
 						<div class="card-body p-0">
 							<table class="table table-bordered table-hover mb-0">
 								<thead class="table-light">
@@ -166,7 +168,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+
 </section>
 
 {#if showDeleteModal}
@@ -208,18 +210,12 @@
 
 <style>
 
-.card.shadow-sm {
-  margin-bottom: 2rem;
-  background-color: rgb(183, 182, 182);
-}
 
-.card-body {
-  padding: 1.5rem;
-}
+	.card-body {
+		padding: 1.5rem;
+	}
 
-#books-page {
-  padding: 1rem;
-}
-
-
+	#books-page {
+		padding: 1rem;
+	}
 </style>
