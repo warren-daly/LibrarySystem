@@ -5,7 +5,6 @@ import { eq } from 'drizzle-orm';
 import * as schema from './schema.js';
 import * as authSchema from './auth.schema.js';
 import { books } from './seed-books-data.js';
-import 'dotenv/config';
 
 const env = Object.fromEntries(
 	readFileSync('.env', 'utf-8')
@@ -17,10 +16,7 @@ const env = Object.fromEntries(
 		})
 );
 
-const client = createClient({
-	url: env.TURSO_DATABASE_URL,
-	authToken: env.TURSO_AUTH_TOKEN
-});
+const client = createClient({ url: env.DATABASE_URL });
 const db = drizzle(client, { schema: { ...schema, ...authSchema } });
 
 async function seedBooks() {
