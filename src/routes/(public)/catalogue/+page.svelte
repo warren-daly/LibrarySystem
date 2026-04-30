@@ -122,6 +122,7 @@
 
 						{#if b.stock === 0}
 							<span class="badge bg-danger mb-2">Out of Stock</span>
+							<span class="badge bg-warning mb-2">Available {new Date(b.nextAvailableDate).toLocaleDateString('en-IE')}</span>
 						{:else}
 							<span class="badge bg-success mb-2">
 								Available ({b.stock})

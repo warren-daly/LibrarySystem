@@ -1,11 +1,17 @@
 import { db } from '$lib/server/db';
-import { book, review } from '$lib/server/db/schema';
+import { book, review, rental } from '$lib/server/db/schema';
 import { eq } from 'drizzle-orm';
 import { cartService } from '$lib/server/services/cart-service.js';
 import { redirect, error, fail } from '@sveltejs/kit';
 
 export async function load() {
 	const books = await db.select().from(book);
+
+	const allRentals = await db.query.rental.findMany({
+		with: {
+			book: true
+		}
+	});
 
 	const booksWithRatings = await Promise.all(
 		books.map(async (b) => {
@@ -18,10 +24,15 @@ export async function load() {
 					? (reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)
 					: null;
 
+			const activeRental = allRentals.find(
+				r => r.bookId === b.id && r.status === 'rented'
+			);
+
 			return {
 				...b,
 				averageRating,
-				reviewCount: reviews.length
+				reviewCount: reviews.length,
+				nextAvailableDate: activeRental?.returnDate || null
 			};
 		})
 	);
