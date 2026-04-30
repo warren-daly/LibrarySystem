@@ -64,7 +64,7 @@ export async function sendRegistrationConfirmationEmail({ to, name }) {
 		subject: 'Welcome to the Online Library',
 		html: `
 			<div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-				<h2>Welcome to the Library System${name ? `, ${name}` : ''}</h2>
+				<h2>Welcome to the Online Library${name ? `, ${name}` : ''}</h2>
 				<p>Your account has been created successfully.</p>
 				<p>You can now log in, browse available books, rent books, and manage your account.</p>
 				<p>If you did not create this account, you can ignore this email.</p>
