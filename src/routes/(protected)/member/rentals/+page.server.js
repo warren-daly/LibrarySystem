@@ -5,6 +5,7 @@ import { review, book } from '$lib/server/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { eq, and } from 'drizzle-orm';
 import { ZodError } from 'zod';
+import { rentalService } from '$lib/server/services/rental-service.js';
 
 export async function load({ url, locals }) {
 	try {
@@ -161,80 +162,9 @@ export const actions = {
 	},
 
 	returnRental: async ({ request, locals }) => {
-		try {
-			const formData = await request.formData();
-			const id = Number(formData.get('rentalId'));
-
-			const existingRental = await rentalService.getRentalById(id);
-
-			if (!existingRental) {
-				return fail(404, {
-					errors: { general: 'Rental not found' }
-				});
-			}
-
-			if (Number(existingRental.userId) !== Number(locals.user?.id)) {
-				return fail(403, {
-					errors: { general: 'Not allowed' }
-				});
-			}
-
-			if (existingRental.status === 'returned' || existingRental.status === 'cancelled') {
-				return fail(400, {
-					errors: { general: 'This rental cannot be returned' }
-				});
-			}
-
-			const isLate = new Date() > new Date(existingRental.returnDate);
-
-			if (isLate) {
-				await rentalService.updateRental(id, {
-					bookId: existingRental.bookId,
-					returnDate: existingRental.returnDate,
-					status: 'late'
-				});
-
-				throw redirect(303, `/member/late-fee/${id}`);
-			}
-
-			await rentalService.updateRental(id, {
-				bookId: existingRental.bookId,
-				returnDate: existingRental.returnDate,
-				status: 'returned'
-			});
-
-			const returnedBook = await db.query.book.findFirst({
-				where: eq(book.id, existingRental.bookId)
-			});
-
-			if (returnedBook) {
-				await db
-					.update(book)
-					.set({ stock: returnedBook.stock + 1 })
-					.where(eq(book.id, existingRental.bookId));
-			}
-
-			return { success: true };
-		} catch (err) {
-			if (err?.status === 303) {
-				throw err;
-			}
-
-			console.error('Error returning rental:', err);
-
-			if (err instanceof ZodError) {
-				const errors = {};
-				err.issues.forEach((issue) => {
-					const field = issue.path[0]?.toString();
-					if (field) errors[field] = issue.message;
-				});
-				return fail(400, { errors });
-			}
-
-			return fail(500, {
-				errors: { general: err instanceof Error ? err.message : 'Failed to return rental' }
-			});
-		}
+		const formData = await request.formData();
+		const rentalId = formData.get('rentalId');
+		return rentalService.handleReturnRental(rentalId, locals.user?.id);
 	},
 
 	LeaveReview: async ({ request, locals }) => {
