@@ -67,6 +67,7 @@ export const actions = {
 	},
 
 	startRental: async ({ locals, request }) => {
+		
 		const data = await request.formData();
 		const bookId = Number(data.get('bookId'));
 		if (!bookId) throw error(400, 'Invalid book');

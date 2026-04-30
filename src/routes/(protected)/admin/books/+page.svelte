@@ -102,7 +102,6 @@
 
 			<div class="row">
 				<div class="col-12">
-					<div class="card shadow-sm">
 						<div class="card-body p-0">
 							<table class="table table-bordered table-hover mb-0">
 								<thead class="table-light">
@@ -169,7 +168,7 @@
 				</div>
 			</div>
 		</div>
-	</div>
+
 </section>
 
 {#if showDeleteModal}
@@ -210,10 +209,7 @@
 {/if}
 
 <style>
-	.card.shadow-sm {
-		margin-bottom: 2rem;
-		background-color: rgb(183, 182, 182);
-	}
+
 
 	.card-body {
 		padding: 1.5rem;
