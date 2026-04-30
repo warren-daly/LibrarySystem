@@ -2,6 +2,9 @@ import { error, redirect } from '@sveltejs/kit';
 import { rentalService } from '$lib/server/services/rental-service.js';
 import { stripe } from '$lib/server/stripe.js';
 import { ORIGIN } from '$env/static/private';
+import { db } from '$lib/server/db';
+import { rental } from '$lib/server/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function load({ params, locals, url }) {
 	if (!locals.user) throw redirect(302, '/auth/login');
@@ -16,15 +19,17 @@ export async function load({ params, locals, url }) {
 
 	if (!rentalRecord) throw error(404, 'Rental not found');
 
+
 	if (Number(rentalRecord.userId) !== Number(locals.user.id)) {
 		throw error(403, 'Not allowed');
 	}
 
-	const success = url.searchParams.get('success');
 	const sessionId = url.searchParams.get('session_id');
 
-	if (success === '1' && sessionId && rentalRecord.status === 'late') {
+	if (sessionId) {
 		const session = await stripe.checkout.sessions.retrieve(sessionId);
+
+		console.log('Stripe session:', session.payment_status);
 
 		if (
 			session.payment_status === 'paid' &&
@@ -32,6 +37,12 @@ export async function load({ params, locals, url }) {
 			Number(session.metadata?.rentalId) === rentalId
 		) {
 			await rentalService.markLateFeePaid(rentalId);
+
+			await db
+				.update(rental)
+				.set({ status: 'returned', lateReturned: true })
+				.where(eq(rental.id, rentalId));
+
 			throw redirect(303, '/member/rentals?payment=success');
 		}
 
@@ -66,6 +77,9 @@ export const actions = {
 			throw redirect(303, '/member/rentals');
 		}
 
+		const feeEuro = 5;
+		const feeCents = feeEuro * 100;
+
 		const session = await stripe.checkout.sessions.create({
 			mode: 'payment',
 			payment_method_types: ['card'],
@@ -79,14 +93,16 @@ export const actions = {
 					price_data: {
 						currency: 'eur',
 						product_data: {
-							name: `Late fee for ${rentalRecord.book?.title ?? `Book #${rentalRecord.bookId}`}`
+							name: `Late fee for ${
+								rentalRecord.book?.title ?? `Book #${rentalRecord.bookId}`
+							}`
 						},
-						unit_amount: 500
+						unit_amount: feeCents
 					},
 					quantity: 1
 				}
 			],
-			success_url: `${ORIGIN}/member/fee/${rentalId}?success=1&session_id={CHECKOUT_SESSION_ID}`,
+			success_url: `${ORIGIN}/member/fee/${rentalId}?session_id={CHECKOUT_SESSION_ID}`,
 			cancel_url: `${ORIGIN}/member/fee/${rentalId}`
 		});
 
