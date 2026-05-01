@@ -5,6 +5,7 @@ import { review, book } from '$lib/server/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { eq, and } from 'drizzle-orm';
 import { ZodError } from 'zod';
+import { sendRentalConfirmationEmail, sendReturnConfirmationEmail, sendLateReturnEmail } from '$lib/server/email/email-service.js';
 
 export async function load({ url, locals }) {
 	try {
@@ -36,11 +37,11 @@ export async function load({ url, locals }) {
 			selectedBookId: selectedBookId ? Number(selectedBookId) : null,
 			currentUser: locals.user ?? null
 		};
-	} catch (err) {
-		console.error('Error retrieving rentals:', err);
-		throw error(500, 'Failed to load rentals');
+		} catch (err) {
+			console.error('Error retrieving rentals:', err);
+			throw error(500, 'Failed to load rentals');
+		}
 	}
-}
 
 export const actions = {
 	startRental: async ({ locals, request }) => {
@@ -140,6 +141,14 @@ export const actions = {
 				.update(book)
 				.set({ stock: selectedBook.stock - 1 })
 				.where(eq(book.id, bookId));
+
+			sendRentalConfirmationEmail({
+				to: locals.user.email,
+				bookTitle: selectedBook.title,
+				returnDate: rentalData.returnDate
+			}).catch((err) => {
+				console.error('Rental confirmation email failed:', err);
+			});
 
 			return { success: true };
 		} catch (err) {

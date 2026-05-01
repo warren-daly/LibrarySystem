@@ -3,6 +3,7 @@ import { order, orderItem, book } from '$lib/server/db/schema.js';
 import { eq } from 'drizzle-orm';
 import { error } from '@sveltejs/kit';
 import { stripe } from '$lib/server/stripe.js';
+import { sendPaymentConfirmationEmail } from '$lib/server/email/email-service.js';
 
 export async function load({ url, locals }) {
   if (!locals.user) throw error(401, 'Not authenticated');
@@ -43,6 +44,14 @@ export async function load({ url, locals }) {
     await db.update(order)
       .set({ status: 'completed' })
       .where(eq(order.id, orderId));
+
+    sendPaymentConfirmationEmail({
+      to: locals.user.email,
+      amount: orderData.total,
+      paymentType: 'Book purchase'
+    }).catch((err) => {
+      console.error('Payment confirmation email failed:', err);
+    });
 
     // Get order items with book titles
     const items = await db

@@ -49,71 +49,86 @@
         }
     }    
 </script>
-<div class="page-header">
-	<h1 class="page-title">Register</h1>
-	<p class="page-subtitle">Create an account to start renting books</p>
+
+<div class="container d-flex justify-content-center align-items-start py-5">
+	<div class="card shadow-sm w-100" style="max-width: 620px;">
+		<div class="card-body p-4">
+			<h1 class="h3 text-center mb-2">Register as a Member</h1>
+			<p class="text-muted text-center mb-4">
+				Create your Online Library account below.
+			</p>
+
+			<form onsubmit={handleRegister}>
+				<div class="row">
+					<div class="col-md-6 mb-3">
+						<label for="fname" class="form-label fw-semibold">First name</label>
+						<input
+							type="text"
+							id="fname"
+							class="form-control"
+							bind:value={firstName}
+							required
+						/>
+					</div>
+
+					<div class="col-md-6 mb-3">
+						<label for="lname" class="form-label fw-semibold">Last name</label>
+						<input
+							type="text"
+							id="lname"
+							class="form-control"
+							bind:value={lastName}
+							required
+						/>
+					</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="email" class="form-label fw-semibold">Email</label>
+					<input
+						type="email"
+						id="email"
+						class="form-control"
+						bind:value={email}
+						required
+					/>
+				</div>
+
+				<div class="mb-3">
+					<label for="pwd" class="form-label fw-semibold">Password</label>
+					<input
+						type="password"
+						id="pwd"
+						class="form-control"
+						bind:value={password}
+						required
+						minlength="8"
+					/>
+					<div class="form-text">Password must be at least 8 characters long.</div>
+				</div>
+
+				<div class="mb-3">
+					<label for="confirmPwd" class="form-label fw-semibold">Confirm password</label>
+					<input
+						type="password"
+						id="confirmPwd"
+						class="form-control"
+						bind:value={confirmPassword}
+						required
+						minlength="8"
+					/>
+				</div>
+
+				{#if errorMessage}
+					<div class="alert alert-danger py-2">{errorMessage}</div>
+				{/if}
+
+				<div class="d-flex gap-2 mt-4">
+					<button type="submit" class="btn btn-primary flex-fill">Register</button>
+					<button type="reset" class="btn btn-outline-secondary flex-fill">Reset</button>
+				</div>
+			</form>
+		</div>
+	</div>
 </div>
-
-<div>
-    <h4 class="heading2">Please enter your details below to register.</h4>
-</div>
-    <div class="forms-container">
-        <form class="form1" onsubmit={handleRegister}>
-            <label for="fname">First name:</label><br>
-            <input type="text" id="fname" name="fname" bind:value={firstName} required><br><br>
-
-            <label for="lname">Last name:</label><br>
-            <input type="text" id="lname" name="lname" bind:value={lastName} required><br><br>
-
-            <label for="email">Email:</label><br>
-            <input type="email" id="email" name="email" bind:value={email} required><br><br>
-
-            <label for="pwd">Create a password:</label><br>
-            <input type="password" id="pwd" name="pwd" bind:value={password} required minlength="6">
-            <small class="password-hint">Passwords must be at least 8 characters long.</small><br><br>
-
-            <label for="confirmPwd">Confirm password:</label><br>
-            <input type="password" id="confirmPwd" name="confirmPwd"  bind:value={confirmPassword} required minlength="6"><br><br>
-            
-			{#if errorMessage}
-            	<p style="color:red;">{errorMessage}</p>
-        	{/if}
-
-            <button type="submit" class="btn btn-primary w-100">
-                <i class="submit"></i> Submit
-            </button><br>
-            <button type="reset" class="btn btn-danger w-100">
-                <i class="reset"></i> Reset
-            </button><br><br><br>
-        </form>
-    </div>
-
-<style>
-
-	.heading2 {
-		text-align: center;
-		margin-bottom: 20px;
-		color: #555;
-	}
-
-	.forms-container {
-		display: flex;
-		justify-content: center;
-		margin-top: 20px;
-	}
-
-	.form1 {
-		padding: 20px;
-		border: 1px solid #ccc;
-		border-radius: 8px;
-		width: 600px;
-		background-color: #f9f9f9;
-	}
-
-	input {
-		width: 100%;
-		padding: 6px;
-	}
-    
-</style>
 
