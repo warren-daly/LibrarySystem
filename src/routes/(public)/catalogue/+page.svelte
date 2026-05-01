@@ -198,7 +198,6 @@
 											</button>
 										</form>
 									{/if}
-
 									<form
 										method="post"
 										action="?/addToCart"

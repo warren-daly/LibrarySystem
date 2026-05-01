@@ -2,10 +2,12 @@ import { drizzle } from 'drizzle-orm/libsql';
 import { createClient } from '@libsql/client';
 import * as schema from './schema';
 import * as authSchema from './auth.schema';
-import { env } from '$env/dynamic/private';
+import { TURSO_DATABASE_URL, TURSO_AUTH_TOKEN } from '$env/static/private';
 
-if (!env.DATABASE_URL) throw new Error('DATABASE_URL is not set');
+if (!TURSO_DATABASE_URL) throw new Error('TURSO_DATABASE_URL is not set');
 
-const client = createClient({ url: env.DATABASE_URL });
-
+const client = createClient({ 
+  url: TURSO_DATABASE_URL, 
+  authToken: TURSO_AUTH_TOKEN, 
+}); 
 export const db = drizzle(client, { schema: { ...schema, ...authSchema } });
