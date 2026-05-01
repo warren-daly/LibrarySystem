@@ -5,7 +5,6 @@ import { review, book } from '$lib/server/db/schema';
 import { error, fail, redirect } from '@sveltejs/kit';
 import { eq, and } from 'drizzle-orm';
 import { ZodError } from 'zod';
-import { rentalService } from '$lib/server/services/rental-service.js';
 
 export async function load({ url, locals }) {
 	try {
