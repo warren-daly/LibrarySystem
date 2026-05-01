@@ -1,12 +1,6 @@
 import { bookService } from '$lib/server/services/books-service.js';
 import { fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
-import fs from 'fs';
-import path from 'path';
-
-
-const uploadsDir = path.resolve('static/uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true }); 
 
 export async function load() {
   try {
@@ -34,20 +28,14 @@ export const actions = {
       if (duplicate) {
         return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
       }
-      const file = formData.get('image');
-      let filename = '';
-      if (file && file.size > 0) {
-        filename = `${Date.now()}-${file.name}`;
-        const buffer = Buffer.from(await file.arrayBuffer());
-        fs.writeFileSync(path.join(uploadsDir, filename), buffer);
-      }
 
+      // Use image URL instead of file upload
       const bookData = {
         title: formData.get('title'),
         author: formData.get('author'),
         description: formData.get('description'),
         genre: formData.get('genre'),
-        image: filename,
+        image: formData.get('image') || '', // Image URL from form
         price: Number(formData.get('price')),
         stock: Number(formData.get('stock'))
       };
@@ -98,25 +86,15 @@ export const actions = {
         return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
       }
 
-
-      let filename = existingBook.image;
-
-      const file = formData.get('image');
-      if (file && file.size > 0) {
-        filename = `${Date.now()}-${file.name}`;
-        const buffer = Buffer.from(await file.arrayBuffer());
-        fs.writeFileSync(path.join(uploadsDir, filename), buffer);
-      }
-
+      // Use image URL instead of file upload
       const bookData = {
         title: formData.get('title'),
         author: formData.get('author'),
         description: formData.get('description'),
         genre: formData.get('genre'),
-        image: filename,
+        image: formData.get('image') || existingBook.image, // Image URL from form or keep existing
         price: Number(formData.get('price')),
         stock: Number(formData.get('stock'))
-
       };
 
       await bookService.updateBook(id, bookData);
