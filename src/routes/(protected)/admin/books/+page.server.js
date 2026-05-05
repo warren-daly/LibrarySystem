@@ -1,9 +1,6 @@
 import { bookService } from '$lib/server/services/books-service.js';
 import { fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
-import { writeFileSync, mkdirSync } from 'fs';
-import { join } from 'path';
-import { v4 as uuidv4 } from 'uuid';
 
 export async function load() {
   try {
@@ -23,8 +20,15 @@ export const actions = {
       const author = (formData.get('author') ?? '').trim();
       const imageFile = formData.get('image');
 
-      if (!imageFile || !(imageFile instanceof File)) {
+      // Validate image file
+      if (!imageFile || !(imageFile instanceof File) || imageFile.size === 0) {
         return fail(400, { errors: { image: 'Please select a valid image file' } });
+      }
+
+      // Validate file size (e.g., max 5MB)
+      const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+      if (imageFile.size > MAX_FILE_SIZE) {
+        return fail(400, { errors: { image: 'Image must be less than 5MB' } });
       }
 
       // Check for duplicate
@@ -37,29 +41,30 @@ export const actions = {
         return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
       }
 
-      // Save the image file
-      const uploadsDir = join(process.cwd(), 'static/uploads');
-      mkdirSync(uploadsDir, { recursive: true });
-      
-      const fileExtension = imageFile.name.split('.').pop();
-      const filename = `${uuidv4()}.${fileExtension}`;
-      const filepath = join(uploadsDir, filename);
-      
-      const buffer = await imageFile.arrayBuffer();
-      writeFileSync(filepath, Buffer.from(buffer));
+      try {
+        // Convert image file to base64
+        const buffer = await imageFile.arrayBuffer();
+        const base64Image = Buffer.from(buffer).toString('base64');
+        const mimeType = imageFile.type || 'image/png';
+        const imageData = `data:${mimeType};base64,${base64Image}`;
 
-      const bookData = {
-        title: formData.get('title'),
-        author: formData.get('author'),
-        description: formData.get('description'),
-        genre: formData.get('genre'),
-        image: filename, // Store just the filename
-        price: Number(formData.get('price')),
-        stock: Number(formData.get('stock'))
-      };
+        const bookData = {
+          title: formData.get('title'),
+          author: formData.get('author'),
+          description: formData.get('description'),
+          genre: formData.get('genre'),
+          image: imageData, // Store as data URI
+          price: Number(formData.get('price')),
+          stock: Number(formData.get('stock'))
+        };
 
-      await bookService.createBook(bookData);
-      return { success: true };
+        await bookService.createBook(bookData);
+        return { success: true };
+
+      } catch (fileError) {
+        console.error('Failed to process image:', fileError);
+        return fail(500, { errors: { image: 'Failed to process image file' } });
+      }
 
     } catch (err) {
       console.error('Error creating book:', err);
@@ -106,19 +111,25 @@ export const actions = {
         return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
       }
 
-      let filename = existingBook.image;
+      let imageData = existingBook.image;
 
-      // If a new image is provided, save it
+      // If a new image is provided, convert it to base64
       if (imageFile && imageFile instanceof File && imageFile.size > 0) {
-        const uploadsDir = join(process.cwd(), 'static/uploads');
-        mkdirSync(uploadsDir, { recursive: true });
-        
-        const fileExtension = imageFile.name.split('.').pop();
-        filename = `${uuidv4()}.${fileExtension}`;
-        const filepath = join(uploadsDir, filename);
-        
-        const buffer = await imageFile.arrayBuffer();
-        writeFileSync(filepath, Buffer.from(buffer));
+        // Validate file size
+        const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+        if (imageFile.size > MAX_FILE_SIZE) {
+          return fail(400, { errors: { image: 'Image must be less than 5MB' } });
+        }
+
+        try {
+          const buffer = await imageFile.arrayBuffer();
+          const base64Image = Buffer.from(buffer).toString('base64');
+          const mimeType = imageFile.type || 'image/png';
+          imageData = `data:${mimeType};base64,${base64Image}`;
+        } catch (fileError) {
+          console.error('Failed to process new image:', fileError);
+          return fail(500, { errors: { image: 'Failed to process image file' } });
+        }
       }
 
       const bookData = {
@@ -126,7 +137,7 @@ export const actions = {
         author: formData.get('author'),
         description: formData.get('description'),
         genre: formData.get('genre'),
-        image: filename,
+        image: imageData,
         price: Number(formData.get('price')),
         stock: Number(formData.get('stock'))
       };
