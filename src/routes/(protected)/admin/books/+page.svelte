@@ -2,7 +2,8 @@
 	import { enhance } from '$app/forms';
 	import BookForm from '$lib/components/BookForm.svelte';
 	import { slide, fade } from 'svelte/transition';
-
+	import { getImageUrl } from '$lib/utils/imageUtils.js';
+	
 	let { data } = $props();
 	let books = $derived(data.books);
 
@@ -131,7 +132,7 @@
 											<td>{b.genre}</td>
 											<td class="text-center">
 												<img
-													src={`/uploads/${b.image}`}
+													src={getImageUrl(b.image)}
 													alt={b.title}
 													class="img-fluid rounded"
 													style="max-width: 80px;max-height: 100px;"

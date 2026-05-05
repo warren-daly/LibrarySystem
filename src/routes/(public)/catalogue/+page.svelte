@@ -1,7 +1,8 @@
 <script>
 	import { enhance } from '$app/forms';
 	import { invalidateAll } from '$app/navigation';
-
+	import { getImageUrl } from '$lib/utils/imageUtils.js';
+	
 	let { data } = $props();
 
 	let cartItems = $state({});
@@ -113,7 +114,7 @@
 					<div class="col-sm-6 col-lg-4 mb-4 d-flex">
 						<div class="card catalogue-card w-100">
 							{#if b.image}
-								<img src={'/uploads/' + b.image} class="card-img-top" alt={`Cover of ${b.title}`} />
+								<img src={getImageUrl(b.image)} class="card-img-top" alt={`Cover of ${b.title}`} />
 							{/if}
 
 							<div class="card-body">
