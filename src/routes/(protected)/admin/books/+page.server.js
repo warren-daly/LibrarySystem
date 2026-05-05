@@ -1,6 +1,9 @@
 import { bookService } from '$lib/server/services/books-service.js';
 import { fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
+import { writeFileSync, mkdirSync, existsSync } from 'fs';
+import { join } from 'path';
+import { v4 as uuidv4 } from 'uuid';
 
 export async function load() {
   try {
@@ -20,18 +23,16 @@ export const actions = {
       const author = (formData.get('author') ?? '').trim();
       const imageFile = formData.get('image');
 
-      // Validate image file
+
       if (!imageFile || !(imageFile instanceof File) || imageFile.size === 0) {
         return fail(400, { errors: { image: 'Please select a valid image file' } });
       }
 
-      // Validate file size (e.g., max 5MB)
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
       if (imageFile.size > MAX_FILE_SIZE) {
         return fail(400, { errors: { image: 'Image must be less than 5MB' } });
       }
 
-      // Check for duplicate
       const allBooks = await bookService.getAllBooks();
       const duplicate = allBooks.some(
         (b) => b.title.toLowerCase() === title.toLowerCase() &&
@@ -42,28 +43,42 @@ export const actions = {
       }
 
       try {
-        // Convert image file to base64
+
+        const uploadsDir = join(process.cwd(), 'static', 'uploads');
+        
+
+        if (!existsSync(uploadsDir)) {
+          mkdirSync(uploadsDir, { recursive: true });
+        }
+
+        const fileExtension = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+        const filename = `${uuidv4()}.${fileExtension}`;
+        const filepath = join(uploadsDir, filename);
+        
+        // Save file
         const buffer = await imageFile.arrayBuffer();
-        const base64Image = Buffer.from(buffer).toString('base64');
-        const mimeType = imageFile.type || 'image/png';
-        const imageData = `data:${mimeType};base64,${base64Image}`;
+        writeFileSync(filepath, Buffer.from(buffer));
+        
+        console.log('Image saved to:', filepath);
 
         const bookData = {
           title: formData.get('title'),
           author: formData.get('author'),
           description: formData.get('description'),
           genre: formData.get('genre'),
-          image: imageData, // Store as data URI
+          image: filename, // Store just the filename
           price: Number(formData.get('price')),
           stock: Number(formData.get('stock'))
         };
 
+        console.log('Saving book:', bookData.title);
         await bookService.createBook(bookData);
+        console.log('Book saved successfully');
         return { success: true };
 
       } catch (fileError) {
-        console.error('Failed to process image:', fileError);
-        return fail(500, { errors: { image: 'Failed to process image file' } });
+        console.error('Failed to save image:', fileError);
+        return fail(500, { errors: { image: 'Failed to save image file' } });
       }
 
     } catch (err) {
@@ -111,24 +126,34 @@ export const actions = {
         return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
       }
 
-      let imageData = existingBook.image;
+      let imageFilename = existingBook.image;
 
-      // If a new image is provided, convert it to base64
+
       if (imageFile && imageFile instanceof File && imageFile.size > 0) {
-        // Validate file size
+
         const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
         if (imageFile.size > MAX_FILE_SIZE) {
           return fail(400, { errors: { image: 'Image must be less than 5MB' } });
         }
 
         try {
+          const uploadsDir = join(process.cwd(), 'static', 'uploads');
+          
+          if (!existsSync(uploadsDir)) {
+            mkdirSync(uploadsDir, { recursive: true });
+          }
+
+          const fileExtension = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
+          imageFilename = `${uuidv4()}.${fileExtension}`;
+          const filepath = join(uploadsDir, imageFilename);
+          
           const buffer = await imageFile.arrayBuffer();
-          const base64Image = Buffer.from(buffer).toString('base64');
-          const mimeType = imageFile.type || 'image/png';
-          imageData = `data:${mimeType};base64,${base64Image}`;
+          writeFileSync(filepath, Buffer.from(buffer));
+          
+          console.log('New image saved to:', filepath);
         } catch (fileError) {
-          console.error('Failed to process new image:', fileError);
-          return fail(500, { errors: { image: 'Failed to process image file' } });
+          console.error('Failed to save new image:', fileError);
+          return fail(500, { errors: { image: 'Failed to save image file' } });
         }
       }
 
@@ -137,7 +162,7 @@ export const actions = {
         author: formData.get('author'),
         description: formData.get('description'),
         genre: formData.get('genre'),
-        image: imageData,
+        image: imageFilename,
         price: Number(formData.get('price')),
         stock: Number(formData.get('stock'))
       };
