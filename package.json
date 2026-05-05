@@ -47,6 +47,7 @@
 		"vitest-browser-svelte": "^2.0.2"
 	},
 	"dependencies": {
+		"@vercel/blob": "^2.3.3",
 		"bcrypt": "^6.0.0",
 		"bootstrap": "^5.3.8",
 		"bootstrap-icons": "^1.13.1",
