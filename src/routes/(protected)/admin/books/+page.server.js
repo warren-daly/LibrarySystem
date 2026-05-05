@@ -1,8 +1,7 @@
 import { bookService } from '$lib/server/services/books-service.js';
 import { fail } from '@sveltejs/kit';
 import { ZodError } from 'zod';
-import { writeFileSync, mkdirSync, existsSync } from 'fs';
-import { join } from 'path';
+import { put } from '@vercel/blob';
 import { v4 as uuidv4 } from 'uuid';
 
 export async function load() {
@@ -23,16 +22,18 @@ export const actions = {
       const author = (formData.get('author') ?? '').trim();
       const imageFile = formData.get('image');
 
-
+      // Validate image file
       if (!imageFile || !(imageFile instanceof File) || imageFile.size === 0) {
         return fail(400, { errors: { image: 'Please select a valid image file' } });
       }
 
+      // Validate file size (e.g., max 5MB)
       const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
       if (imageFile.size > MAX_FILE_SIZE) {
         return fail(400, { errors: { image: 'Image must be less than 5MB' } });
       }
 
+      // Check for duplicate
       const allBooks = await bookService.getAllBooks();
       const duplicate = allBooks.some(
         (b) => b.title.toLowerCase() === title.toLowerCase() &&
@@ -43,30 +44,22 @@ export const actions = {
       }
 
       try {
-
-        const uploadsDir = join(process.cwd(), 'static', 'uploads');
+        // Upload image to Vercel Blob Storage
+        console.log('Uploading image to Vercel Blob:', imageFile.name);
         
+        const filename = `books/${uuidv4()}_${imageFile.name}`;
+        const blob = await put(filename, imageFile, {
+          access: 'public',
+        });
 
-        if (!existsSync(uploadsDir)) {
-          mkdirSync(uploadsDir, { recursive: true });
-        }
-
-        const fileExtension = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
-        const filename = `${uuidv4()}.${fileExtension}`;
-        const filepath = join(uploadsDir, filename);
-        
-        // Save file
-        const buffer = await imageFile.arrayBuffer();
-        writeFileSync(filepath, Buffer.from(buffer));
-        
-        console.log('Image saved to:', filepath);
+        console.log('Image uploaded successfully:', blob.url);
 
         const bookData = {
           title: formData.get('title'),
           author: formData.get('author'),
           description: formData.get('description'),
           genre: formData.get('genre'),
-          image: filename, // Store just the filename
+          image: blob.url, // Store the blob URL
           price: Number(formData.get('price')),
           stock: Number(formData.get('stock'))
         };
@@ -77,8 +70,8 @@ export const actions = {
         return { success: true };
 
       } catch (fileError) {
-        console.error('Failed to save image:', fileError);
-        return fail(500, { errors: { image: 'Failed to save image file' } });
+        console.error('Failed to upload image:', fileError);
+        return fail(500, { errors: { image: 'Failed to upload image file' } });
       }
 
     } catch (err) {
@@ -126,34 +119,29 @@ export const actions = {
         return fail(400, { errors: { general: 'A book with this title and author already exists.' } });
       }
 
-      let imageFilename = existingBook.image;
+      let imageUrl = existingBook.image;
 
-
+      // If a new image is provided, upload it
       if (imageFile && imageFile instanceof File && imageFile.size > 0) {
-
+        // Validate file size
         const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
         if (imageFile.size > MAX_FILE_SIZE) {
           return fail(400, { errors: { image: 'Image must be less than 5MB' } });
         }
 
         try {
-          const uploadsDir = join(process.cwd(), 'static', 'uploads');
+          console.log('Uploading new image to Vercel Blob:', imageFile.name);
           
-          if (!existsSync(uploadsDir)) {
-            mkdirSync(uploadsDir, { recursive: true });
-          }
+          const filename = `books/${uuidv4()}_${imageFile.name}`;
+          const blob = await put(filename, imageFile, {
+            access: 'public',
+          });
 
-          const fileExtension = imageFile.name.split('.').pop()?.toLowerCase() || 'jpg';
-          imageFilename = `${uuidv4()}.${fileExtension}`;
-          const filepath = join(uploadsDir, imageFilename);
-          
-          const buffer = await imageFile.arrayBuffer();
-          writeFileSync(filepath, Buffer.from(buffer));
-          
-          console.log('New image saved to:', filepath);
+          console.log('New image uploaded successfully:', blob.url);
+          imageUrl = blob.url;
         } catch (fileError) {
-          console.error('Failed to save new image:', fileError);
-          return fail(500, { errors: { image: 'Failed to save image file' } });
+          console.error('Failed to upload new image:', fileError);
+          return fail(500, { errors: { image: 'Failed to upload image file' } });
         }
       }
 
@@ -162,7 +150,7 @@ export const actions = {
         author: formData.get('author'),
         description: formData.get('description'),
         genre: formData.get('genre'),
-        image: imageFilename,
+        image: imageUrl,
         price: Number(formData.get('price')),
         stock: Number(formData.get('stock'))
       };
